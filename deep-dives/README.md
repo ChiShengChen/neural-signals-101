@@ -19,6 +19,11 @@ the deepest content, not just Chapter 12.
 | [Chance level & CIs](chance_level_ci.ipynb) | Binomial test, Wilson/Clopper-Pearson intervals, Müller-Putz "above chance" thresholds | Ch 11 |
 | [Benchmark overfitting](benchmark_overfitting.md) | How a whole field can overfit one benchmark — leakage at population scale (no code) | Ch 12 |
 | [ICA & ASR internals](ica_asr_internals.ipynb) | Blind source separation math, a cocktail-party demo, ASR's subspace reconstruction | Ch 05 |
+| [Brain or artifact?](artifact_confounds.ipynb) | Decoding confounds — EOG/EMG masquerading as a "BCI"; honesty checks (the physiological twin of leakage) | Ch 03, 05, 12 |
+| [Transfer & domain adaptation](domain_adaptation.ipynb) | Euclidean/Riemannian alignment, calibration trials, fine-tuning — rescuing cross-subject/session accuracy | Ch 07, 12 |
+| [Filter-bank CSP (FBCSP)](fbcsp.ipynb) | Multi-band CSP + feature selection; the classic competition-winning MI baseline | Ch 06, 07 |
+| [Interpreting nets & augmentation](interpretability_augmentation.ipynb) | EEGNet gradient saliency + EEG data augmentation for small data | Ch 09 |
+| [Real P300 & SSVEP (MOABB)](real_p300_ssvep.ipynb) | Real ERP/SSVEP datasets (vs the simulated demos in Ch 10) | Ch 10, 12 |
 
 ## Building & running
 

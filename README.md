@@ -133,7 +133,9 @@ jupyter notebook notebooks/   # or: make run-all   to execute them all headless
 
 **Everyone reads Chapter 12 (evaluation pitfalls) and Chapter 13 (ethics & anti-hype)** —
 they are the point of the whole tutorial. Want more depth? The **[deep-dives/](deep-dives/)**
-folder is the advanced ceiling (CSP geometry, Riemannian math, statistical rigor, …) —
+folder is the advanced ceiling (CSP geometry, Riemannian math, statistical rigor,
+**is-it-brain-or-artifact?**, **transfer/domain adaptation**, FBCSP, model
+interpretability, real P300/SSVEP, …) —
 optional side-quests that aren't bound by the 5-minute budget.
 
 ---
