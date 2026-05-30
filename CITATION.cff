@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: "ML & Signal Processing on Neural Signals 101"
+message: "If you use this tutorial in teaching or research, please cite it."
+type: software
+authors:
+  - name: "Neural Signals 101 contributors"
+abstract: >-
+  A beginner-friendly, fully runnable tutorial taking learners from raw public
+  EEG recordings through preprocessing, features, classical and deep models, to
+  honest, leakage-free evaluation. Bilingual (English / Traditional Chinese),
+  CPU-only, with a tested src/ package, deep-dive side-quests, and CI.
+keywords:
+  - EEG
+  - BCI
+  - brain-computer interface
+  - signal processing
+  - machine learning
+  - tutorial
+  - reproducibility
+  - data leakage
+license: MIT
+repository-code: "https://github.com/ChiShengChen/neural-signals-101"
+url: "https://github.com/ChiShengChen/neural-signals-101"
+version: "0.1.0"

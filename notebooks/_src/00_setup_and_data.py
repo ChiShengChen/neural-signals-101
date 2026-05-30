@@ -248,6 +248,21 @@ else:
 # - **Cached downloads** in `~/neuro101_data` (override with `NEURO101_DATA`).
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# 1. An epoched array has shape `(n_trials, n_channels, n_times)`. Which axis do you
+#    average over to get one number **per channel per trial**?
+# 2. Why must `X` and `y` agree on axis 0, and what breaks if you reorder trials in
+#    `X` but not in `y`?
+# 3. Two datasets here have different sampling rates (e.g. 160 vs 250 Hz). Why does a
+#    filter or FFT written for one rate misbehave on the other?
+#
+# **Answers:** (1) `axis=2` (time) → `(n_trials, n_channels)`. (2) `y[i]` is the label
+# of `X[i]`; reordering one without the other silently mislabels every trial. (3) Both
+# operate in units of *fraction of the sampling rate*, so the same cutoff in Hz maps to
+# a different normalized frequency at a different `sfreq` — always carry `sfreq` with the data.
+
+# %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong
 #
 # - **Assuming data lives on your disk.** Never hard-code `/Users/me/eeg.edf`.

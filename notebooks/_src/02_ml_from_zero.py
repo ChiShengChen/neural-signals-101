@@ -347,7 +347,7 @@ print("Difference (optimism bias):", round(cheat_score - honest_score, 3))
 #    splitting strategies.
 
 # %% [markdown]
-# ## Warning — Common mistakes / why this is wrong
+# ## ⚠️ Common mistakes / why this is wrong
 #
 # - **Choosing your model by looking at the test set.** Even "just one peek" counts.
 #   Every peek lets the test set influence your choice, inflating your reported

@@ -256,7 +256,8 @@ if p300_section_ok:
     print(f"\n平均 ROC-AUC : {mean_auc:.3f}  （隨機分類器 = 0.50）")
     print(f"平均平衡準確率: {mean_bal_acc:.3f}  （機率水準 = 0.50）")
     print(f"\n重點：即使在嚴重類別不平衡（約 5:1 非目標：目標）下，ROC-AUC >> 0.5。")
-    print("這就是為什麼我們不依賴原始準確率（即使全部預測為非目標，準確率也約達 83%）。")
+    print("這就是為什麼我們不依賴原始準確率（即使全部預測為非目標,")
+    print("這種無意義的分類器準確率也約達 83%）。")
 else:
     mean_auc = float("nan")
     mean_bal_acc = float("nan")
@@ -468,8 +469,9 @@ if ssvep_section_ok:
           f"（相對提升 {100*(mean_acc_ssvep/chance_ssvep - 1):.0f}%）")
     print()
     print("注意：適中的絕對準確率反映了解碼緊密相鄰頻率（Δf = 0.5 Hz）、")
-    print("短試次且無受試者特定校準的困難程度。P300 段落中的黎曼方法")
-    print("同樣可改善 SSVEP 解碼（參見 moabb.evaluations 中的基準測試）。")
+    print("短試次的困難程度,而且沒有做受試者特定校準。")
+    print("P300 段落中用的黎曼方法,同樣可以改善 SSVEP 解碼")
+    print("（參見 moabb.evaluations 中的基準測試）。")
 else:
     mean_acc_ssvep = float("nan")
     chance_ssvep = float("nan")

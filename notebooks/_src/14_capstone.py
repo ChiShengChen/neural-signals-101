@@ -306,6 +306,22 @@ print(f"Gap          : {gap:+.3f}  "
 # > per-subject fine-tuning with a small calibration set next."
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# 1. Why are you told to call `score_on_hidden()` **exactly once**, at the very end?
+# 2. Your dev (LOSO) estimate is 0.70 but the hidden held-out score is 0.62. Is that
+#    gap a bug, or expected — and what does its *size* tell you?
+# 3. A friend tries 20 pipelines, submits each to the hidden set, and reports the best.
+#    Which Chapter 12 pitfall is that, and what should they have done instead?
+#
+# **Answers:** (1) Each look lets the hidden set influence your choices, so repeated
+# "submissions" turn it into a validation set and inflate the final number. (2) Expected —
+# the dev estimate is mildly optimistic because you selected your pipeline on it; a *small*
+# dev↔hidden gap means your development was honest. (3) Tuning/model-selection on the test
+# set (pitfall #7) — they should have selected on the dev subjects (LOSO) and touched the
+# hidden set once.
+
+# %% [markdown]
 # ## ⚠️ Common mistakes
 #
 # - **Calling `score_on_hidden` more than once.** Every call is a peek; you can
