@@ -7,6 +7,23 @@
 # ---
 
 # %% [markdown]
+# [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ChiShengChen/neural-signals-101/blob/main/notebooks/12_evaluation_and_pitfalls.ipynb)
+#
+# > **Running on Google Colab?** Run the next cell first — it installs everything and
+# > fetches the helper package. **Running locally (after `make setup`)?** The next
+# > cell does nothing; just run it and continue.
+
+# %%
+# --- Colab bootstrap: installs deps + the neuro101 package ONLY on Colab ---
+import sys, os
+if "google.colab" in sys.modules:
+    !pip install -q "mne==1.8.0" "moabb==1.2.0" "braindecode==0.8.1" "pyriemann==0.7" "scikit-learn==1.5.2"
+    if not os.path.exists("neural-signals-101"):
+        !git clone -q https://github.com/ChiShengChen/neural-signals-101
+    sys.path.insert(0, os.path.abspath("neural-signals-101/src"))
+    print("Colab setup complete — continue to the chapter below.")
+
+# %% [markdown]
 # # Chapter 12 — Evaluation & Pitfalls  ⭐ (the most important chapter)
 #
 # Almost every "amazing" neural-decoding result that fails to reproduce died of one

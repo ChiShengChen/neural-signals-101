@@ -73,10 +73,18 @@ jupyter notebook notebooks/   # or: make run-all   to execute them all headless
 
 ## How to use this tutorial
 
-- **Work through the notebooks in order** (`notebooks/00_*` → `10_*`). Each one is
-  self-contained, opens with **learning objectives**, has explanatory markdown
-  between every code step, at least one **visualization**, and a closing
-  **"Common mistakes / why this is wrong"** cell.
+> 🚀 **Never opened a Jupyter notebook, or not sure your Python is ready?** Start with
+> [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md) — including a one-click
+> **Run-on-Colab** path (no install) and a 5-question Python self-check.
+> Helpful tabs to keep open: [Glossary](docs/GLOSSARY.md) ·
+> [FAQ](docs/FAQ.md) ("is my score good?") · [Cheat sheet](docs/CHEATSHEET.md) ·
+> [Troubleshooting](docs/TROUBLESHOOTING.md).
+
+- **Work through the notebooks in order** (`notebooks/00_*` → `15_*`). Each one is
+  self-contained, opens with **learning objectives** + a **prerequisite/difficulty**
+  box, has explanatory markdown between every code step, **"predict-before-run"**
+  cells, at least one **visualization**, a **✅ concept check**, and a closing
+  **"⚠️ Common mistakes / why this is wrong"** cell.
 - **Every ⚠️ cell is wrong on purpose.** It exists to show you a trap and the
   resulting fake-high score — never copy a ⚠️ cell into real work.
 - **The shared code lives in `src/neuro101/`** and is imported by every notebook
@@ -98,6 +106,37 @@ jupyter notebook notebooks/   # or: make run-all   to execute them all headless
 they are the point of the whole tutorial.
 
 ---
+
+## 🗺️ The map
+
+```mermaid
+flowchart TD
+    subgraph A["On-ramps (get both feet under you)"]
+        C0["00 Setup + array shapes"] --> C1["01 What EEG physically is"]
+        C1 --> C2["02 ML from zero<br/>(test is sacred)"]
+        C2 --> C3["03 Math you can see<br/>(Fourier · covariance · CSP)"]
+    end
+    subgraph B["Signal processing → features"]
+        C3 --> C4["04 DSP basics"] --> C5["05 Preprocessing / ICA"] --> C6["06 Frequency domain"]
+        C6 --> C7["07 Features ↔ physiology"]
+    end
+    subgraph D["Modeling"]
+        C7 --> C8["08 Classical ML<br/>(proper CV)"] --> C9["09 Deep learning"]
+    end
+    subgraph E["Applications + the honesty core"]
+        C9 --> C10["10 Paradigms × neuro"] --> C11["11 Statistics intuition"]
+        C11 --> C12["⭐ 12 Evaluation & pitfalls"] --> C13["13 Ethics & anti-hype"]
+        C13 --> C14["14 Capstone<br/>(hidden held-out)"]
+    end
+    C14 -.optional.-> C15["15 Real-time & hardware"]
+
+    style C2 fill:#ffe7b3,stroke:#cc8800
+    style C3 fill:#ffe7b3,stroke:#cc8800
+    style C12 fill:#d1f0d1,stroke:#2e8b57,stroke-width:3px
+    style C13 fill:#ffe7b3,stroke:#cc8800
+```
+
+*Amber = beginner on-ramps · green = the chapter the whole tutorial builds toward.*
 
 ## Chapters (with estimated runtime)
 
@@ -149,7 +188,8 @@ src/neuro101/   io.py preprocessing.py features.py viz.py eval.py datasets.py   
 notebooks/      00_setup … 15_realtime  (.ipynb, built from notebooks/_src/*.py)
 tests/          pytest for src/ + a smoke test that every notebook executes
 scripts/        make_headline_figure.py  build_notebooks.py  run_all_notebooks.py
-docs/           headline.png  CURRICULUM.md  GLOSSARY.md  TROUBLESHOOTING.md  SOLUTIONS.md
+docs/           headline.png  CURRICULUM.md  GETTING_STARTED.md  GLOSSARY.md
+                FAQ.md  CHEATSHEET.md  TROUBLESHOOTING.md  SOLUTIONS.md
 .github/workflows/ci.yml  (pytest + notebook smoke test on push)
 ```
 
