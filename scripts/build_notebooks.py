@@ -30,11 +30,22 @@ BUILD_DIRS = [
 
 def build_one(py_path: Path, out_dir: Path) -> Path:
     nb = jupytext.read(py_path)
-    # Ensure a clean, output-free notebook with a stable kernel spec.
+    # Write COMPLETE, standard notebook metadata. jupytext omits `language_info`
+    # when generating from a .py, and GitHub's notebook renderer (unlike local
+    # nbconvert) errors out ("An error occurred...") on notebooks without it.
     nb.metadata["kernelspec"] = {
-        "display_name": "Python 3 (neuro101)",
+        "display_name": "Python 3 (ipykernel)",
         "language": "python",
         "name": "python3",
+    }
+    nb.metadata["language_info"] = {
+        "name": "python",
+        "version": "3.11",
+        "mimetype": "text/x-python",
+        "codemirror_mode": {"name": "ipython", "version": 3},
+        "pygments_lexer": "ipython3",
+        "nbconvert_exporter": "python",
+        "file_extension": ".py",
     }
     out_path = out_dir / (py_path.stem + ".ipynb")
     jupytext.write(nb, out_path, fmt="notebook")
