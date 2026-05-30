@@ -21,6 +21,9 @@
 | [Filter-bank CSP(FBCSP)](fbcsp.ipynb) | 多頻帶 CSP + 特徵選擇;經典競賽冠軍級的 MI baseline | 第 06、07 章 |
 | [解讀模型與資料增強](interpretability_augmentation.ipynb) | EEGNet 梯度 saliency + 小資料的 EEG data augmentation | 第 09 章 |
 | [真實 P300 與 SSVEP(MOABB)](real_p300_ssvep.ipynb) | 真實 ERP/SSVEP 資料集(對比第 10 章的模擬 demo) | 第 10、12 章 |
+| [回歸式解碼](regression_decoding.ipynb) | 預測**連續**目標;R²/MAE/相關係數;自相關目標的洩漏陷阱 | 第 06、08、12 章 |
+| [源定位](source_localization.ipynb) | 病態的逆問題;fsaverage forward + MNE/dSPM inverse(headless 2D 視覺化) | 第 01、02 章 |
+| [自監督學習](self_supervised.ipynb) | pretext 預訓練(relative positioning)→ 少量標籤微調;EEG foundation model 的概念 | 第 09 章 |
 | [ICA 與 ASR 內部機制](ica_asr_internals.ipynb) | 盲源分離的數學、雞尾酒會 demo、ASR 的子空間重建 | 第 05 章 |
 
 ## 建置與執行

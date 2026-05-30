@@ -24,6 +24,9 @@ the deepest content, not just Chapter 12.
 | [Filter-bank CSP (FBCSP)](fbcsp.ipynb) | Multi-band CSP + feature selection; the classic competition-winning MI baseline | Ch 06, 07 |
 | [Interpreting nets & augmentation](interpretability_augmentation.ipynb) | EEGNet gradient saliency + EEG data augmentation for small data | Ch 09 |
 | [Real P300 & SSVEP (MOABB)](real_p300_ssvep.ipynb) | Real ERP/SSVEP datasets (vs the simulated demos in Ch 10) | Ch 10, 12 |
+| [Regression decoding](regression_decoding.ipynb) | Predicting **continuous** targets; R²/MAE/correlation; the autocorrelated-target leakage trap | Ch 06, 08, 12 |
+| [Source localization](source_localization.ipynb) | The ill-posed inverse problem; fsaverage forward + MNE/dSPM inverse (headless 2-D views) | Ch 01, 02 |
+| [Self-supervised learning](self_supervised.ipynb) | Pretext pretraining (relative positioning) → fine-tune on few labels; the idea behind EEG foundation models | Ch 09 |
 
 ## Building & running
 
