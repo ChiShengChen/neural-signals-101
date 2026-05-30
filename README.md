@@ -122,11 +122,14 @@ jupyter notebook notebooks/   # or: make run-all   to execute them all headless
 | If you are… | Suggested path |
 |---|---|
 | **A total beginner** (the design target) | Do **00 → 14 in order**. Chapter 15 is an optional appendix. |
-| **Comfortable with ML, new to signals** | Skim **02**, do **03**; focus **01, 04–07, 10, 12, 13**. |
+| **Comfortable with ML, new to signals** | Skim **02**, do **03**; focus **01, 04–07, 10, 12, 13** (+ [deep-dives](deep-dives/)). |
 | **Comfortable with neuro, new to ML** | Skim **01**; do **02, 03, 11**; focus **04–09, 12**. |
+| **Just want honest evaluation** (save your paper) | **02** → **08** → **11** → **⭐12** → [`deep-dives/stats_rigor`](deep-dives/stats_rigor.ipynb). |
 
 **Everyone reads Chapter 12 (evaluation pitfalls) and Chapter 13 (ethics & anti-hype)** —
-they are the point of the whole tutorial.
+they are the point of the whole tutorial. Want more depth? The **[deep-dives/](deep-dives/)**
+folder is the advanced ceiling (CSP geometry, Riemannian math, statistical rigor, …) —
+optional side-quests that aren't bound by the 5-minute budget.
 
 ---
 
@@ -177,7 +180,7 @@ flowchart TD
 | 09 | [Deep learning](notebooks/09_deep_learning.ipynb) | EEGNet, ShallowConvNet, DeepConvNet, LSTM, tiny Transformer | ★★★★ | ~3–5 min |
 | 10 | [Paradigms & applications](notebooks/10_paradigms_and_applications.ipynb) | MI, P300/ERP, SSVEP, sleep, seizure, brain-to-text — **why each works** | ★★★ | ~2–3 min |
 | 11 | [**Statistics intuition**](notebooks/11_statistics_intuition.ipynb) 🆕 | Sampling variation, mean±std, chance≠1/k, "a small gap is noise" | ★★★ | ~1–2 min |
-| 12 | [**Evaluation & pitfalls**](notebooks/12_evaluation_and_pitfalls.ipynb) ⭐ | Six WRONG→RIGHT pairs; the most important chapter | ★★★★ | ~2–4 min |
+| 12 | [**Evaluation & pitfalls**](notebooks/12_evaluation_and_pitfalls.ipynb) ⭐ | Seven WRONG→RIGHT pairs (incl. nested CV); the most important chapter | ★★★★ | ~2–4 min |
 | 13 | [**Neuroethics & anti-hype**](notebooks/13_neuroethics_and_anti_hype.ipynb) 🆕 | Privacy, consent, neuro-rights, "offline 95% ≠ a BCI", hype = leakage's twin | ★★ | ~1 min |
 | 14 | [Capstone](notebooks/14_capstone.ipynb) | Raw → honest report vs a **hidden held-out leaderboard** | ★★★★ | ~2–4 min |
 | 15 | [Real-time & hardware](notebooks/15_realtime_and_hardware.ipynb) 🆕 | Simulated streaming inference + a low-cost hardware path (OpenBCI/Muse) | ★★ | ~1–2 min |
@@ -209,6 +212,7 @@ environment variable). See `src/neuro101/datasets.py` for the full registry and
 README.md                LICENSE (MIT)   CONTRIBUTING.md   requirements.txt   Makefile
 src/neuro101/   io.py preprocessing.py features.py viz.py eval.py datasets.py   (importable, tested)
 notebooks/      00_setup … 15_realtime  (.ipynb, built from notebooks/_src/*.py)
+deep-dives/     advanced side-quests (CSP geometry, Riemann, stats rigor, …)
 tests/          pytest for src/ + a smoke test that every notebook executes
 scripts/        make_headline_figure.py  build_notebooks.py  run_all_notebooks.py
 docs/           headline.png  CURRICULUM.md  GETTING_STARTED.md  GLOSSARY.md

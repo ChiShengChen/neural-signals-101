@@ -17,11 +17,15 @@ from pathlib import Path
 import jupytext
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC_DIR = ROOT / "notebooks" / "_src"
-OUT_DIR = ROOT / "notebooks"
+# (source dir, output dir) pairs. The main spine lives in notebooks/; the optional
+# advanced side-quests live in deep-dives/.
+BUILD_DIRS = [
+    (ROOT / "notebooks" / "_src", ROOT / "notebooks"),
+    (ROOT / "deep-dives" / "_src", ROOT / "deep-dives"),
+]
 
 
-def build_one(py_path: Path) -> Path:
+def build_one(py_path: Path, out_dir: Path) -> Path:
     nb = jupytext.read(py_path)
     # Ensure a clean, output-free notebook with a stable kernel spec.
     nb.metadata["kernelspec"] = {
@@ -29,20 +33,25 @@ def build_one(py_path: Path) -> Path:
         "language": "python",
         "name": "python3",
     }
-    out_path = OUT_DIR / (py_path.stem + ".ipynb")
+    out_path = out_dir / (py_path.stem + ".ipynb")
     jupytext.write(nb, out_path, fmt="notebook")
     return out_path
 
 
 def main() -> int:
-    sources = sorted(SRC_DIR.glob("*.py"))
-    if not sources:
-        print(f"No sources found in {SRC_DIR}", file=sys.stderr)
+    total = 0
+    for src_dir, out_dir in BUILD_DIRS:
+        sources = sorted(src_dir.glob("*.py"))
+        if not sources:
+            continue
+        for py in sources:
+            out = build_one(py, out_dir)
+            print(f"  built {out.relative_to(ROOT)}")
+        total += len(sources)
+    if total == 0:
+        print("No notebook sources found.", file=sys.stderr)
         return 1
-    for py in sources:
-        out = build_one(py)
-        print(f"  built {out.relative_to(ROOT)}")
-    print(f"✅ built {len(sources)} notebooks")
+    print(f"✅ built {total} notebooks")
     return 0
 
 

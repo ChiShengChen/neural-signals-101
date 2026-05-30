@@ -17,6 +17,7 @@ env/
 .ipynb_checkpoints/
 # Executed-notebook artifacts (the committed notebooks/*.ipynb are clean, no outputs).
 notebooks/_executed/
+deep-dives/_executed/
 
 # Downloaded / cached datasets (can be GBs — never commit)
 data/

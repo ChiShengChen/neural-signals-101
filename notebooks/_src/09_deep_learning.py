@@ -156,6 +156,39 @@ for name in ["EEGNet", "ShallowConvNet", "DeepConvNet"]:
     print(f"  {name:15s} held-out-subject accuracy: {hist[-1]:.3f}")
 
 # %% [markdown]
+# ## ⚠️ Read this before you compare any two numbers above
+#
+# It is tempting to look at the three accuracies and announce "model X is best". **Stop.**
+# Each is a *single training run with a single seed*, on *one* held-out subject. Deep
+# training is noisy — change the random seed and the numbers move. Let's measure that
+# noise by re-training the **same** EEGNet with different seeds:
+
+# %% [markdown]
+# **Before running:** the architecture and data are identical across the runs below —
+# only the random seed changes. How far apart will the accuracies be? (Guess a range.)
+
+# %%
+seed_accs = []
+for s in range(3):
+    torch.manual_seed(s)
+    np.random.seed(s)
+    h = train_eval(make_model("EEGNet"), Xtr, ytr, Xte, yte)
+    seed_accs.append(h[-1])
+    print(f"  EEGNet seed {s}: {h[-1]:.3f}")
+seed_accs = np.array(seed_accs)
+print(f"  -> same model, same data: {seed_accs.mean():.3f} ± {seed_accs.std():.3f} "
+      f"(spread {seed_accs.max() - seed_accs.min():.3f})")
+
+# %% [markdown]
+# > **The honesty disclaimer (applies to every number in this chapter):** these are
+# > **single-seed runs whose purpose is to teach the *plumbing*** — how to build, train
+# > and evaluate an EEG net on CPU — **not** to rank architectures. The seed-to-seed
+# > spread above is often as large as the differences *between* models, so any
+# > "EEGNet beats DeepConvNet" claim from one run is meaningless. A real architecture
+# > comparison needs **many seeds × many subjects + a paired test** (Chapter 11), and a
+# > classical baseline (Chapters 07–08), which on small EEG data frequently wins.
+
+# %% [markdown]
 # ## 2. A minimal LSTM
 #
 # Recurrent nets read the signal time-step by time-step. EEG is long, so we treat

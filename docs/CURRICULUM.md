@@ -77,4 +77,29 @@ Everything else is reordering plus weaving physiology into 01/07/10.
 - **Total beginner:** 00 → 14 in order (this is the design target).
 - **Has ML, new to signals:** skim 02, do 03; focus 01,04–07,10,12,13.
 - **Has neuro, new to ML:** skim 01; do 02,03,11; focus 04–09,12.
+- **Just want honest evaluation:** 02 → 08 → 11 → 12 → `deep-dives/stats_rigor`.
 - **Everyone reads 12 and 13.**
+
+---
+
+## v2.1 addendum — spine + sidequests, and depth on the honesty core
+
+A later refinement (keeping the 00–15 numbering, no renumber) added:
+
+- **`deep-dives/`** — the **advanced ceiling** (CSP geometry & derivation, Riemannian
+  small-data math, statistical rigor, chance-level CIs, benchmark overfitting, ICA/ASR
+  internals). This realises the **"spine细而慢 + sidequests深而硬"** design: the
+  5-minute-CPU promise binds **only the spine**; deep-dives may be heavier and are
+  **excluded from the CI smoke test**. Each ends with a subtler, topic-specific trap so
+  "don't fool yourself" runs to the deepest content.
+- **Chapter 12 reframe** — the headline rule is now *match the evaluation to your
+  deployment claim*, not "LOSO is the only truth": leak-free within-subject evaluation is
+  honest **for a calibrated personal model**, as long as it's labelled as such. (Avoid
+  trading the random-split myth for a new LOSO dogma.)
+- **Pitfall #7 — tuning / model-selection on the test set** (nested CV) added as the
+  seventh WRONG→RIGHT pair: the #1 silent killer in practice.
+- **Chapter 09 seed-variance honesty note** — single-seed runs teach *plumbing*, not
+  architecture comparison; the seed-to-seed spread is shown explicitly.
+- **Chapter 11 rigor** — binomial "above chance" test + the Nadeau-Bengio corrected
+  resampled t-test (naive CV t-tests are anti-conservative).
+- **CI soul-guard** (`tests/test_pitfalls.py`) — asserts the WRONG>RIGHT contrasts hold.

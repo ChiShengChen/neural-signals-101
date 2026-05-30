@@ -37,13 +37,14 @@ if "google.colab" in sys.modules:
 # **The drop is the lesson.** We print and plot both numbers so the contrast is
 # unmissable. Every ⚠️ cell is wrong on purpose — never copy it into real work.
 #
-# ## The six pitfalls
+# ## The seven pitfalls
 # 1. Random shuffle split on continuous/epoched data (autocorrelation leakage).
-# 2. Subject-dependent vs subject-independent evaluation.
+# 2. Subject-dependent vs subject-independent — *and matching evaluation to your claim*.
 # 3. Preprocessing / feature leakage (fitting on all data before the split).
 # 4. Class imbalance & the wrong metric.
 # 5. Cross-session / domain shift.
 # 6. Lucky seed / no variance reporting.
+# 7. Tuning / model selection on the test set (the #1 silent killer) → nested CV.
 #
 # > **Prerequisites:** Chapters 02, 08 and 11.
 # > **Difficulty:** ★★★★☆
@@ -168,8 +169,29 @@ print(f"✅ RIGHT (LOSO) accuracy = {right2:.3f}")
 scoreboard["2. Subject\nleakage"] = (wrong2, right2)
 
 # %% [markdown]
-# > **Takeaway 2:** The headline metric must be **subject-independent** (LOSO).
-# > Subject-dependent numbers are optimistic — label them as such.
+# ### The real rule isn't "LOSO always" — it's *match the evaluation to your claim*
+#
+# It's tempting to walk away thinking "LOSO is the truth and within-subject is a lie".
+# That over-corrects. The honest principle is **match your evaluation to how you will
+# actually deploy**:
+#
+# | If you claim… | …then the honest evaluation is | Example |
+# |---|---|---|
+# | "works on a **new user** out of the box" | **subject-independent** (LOSO) | a generic consumer BCI |
+# | "works after **per-user calibration**" | **within-subject**, leak-free split | a clinical device calibrated per patient; SSVEP spellers |
+# | "works **within one session**" | within-session block split | a one-off lab experiment |
+#
+# Within-subject is **not** dishonest — *as long as the split itself doesn't leak*
+# (pitfalls #1 and #3 still apply) and you **state which question you answered**. The
+# sin is reporting a within-subject number while *implying* it generalises to new
+# people. Don't trade one myth ("random split is fine") for a new dogma ("only LOSO
+# counts").
+
+# %% [markdown]
+# > **Takeaway 2:** Report the metric that matches your deployment claim, and **label
+# > it honestly**. If you claim it works on new people, the headline must be
+# > subject-independent (LOSO). A within-subject number is fine for a calibrated
+# > personal model — just never let it masquerade as cross-subject.
 
 # %% [markdown]
 # ---
@@ -388,6 +410,61 @@ if len(fold_csp) == len(fold_riem) and len(fold_csp) >= 3:
 
 # %% [markdown]
 # ---
+# # Pitfall 7 — Tuning on the test set (the #1 silent killer)
+#
+# This one hides in plain sight. You try several preprocessing choices, models, or
+# hyper-parameters, **pick the one that scores best on your evaluation data, and then
+# report that best score.** But "the best of many tries" is optimistically biased — a
+# *winner's curse*. The more configurations you try, the more inflated the winner.
+#
+# The fix is **nested cross-validation**: an *inner* loop picks the hyper-parameter,
+# an *outer* loop scores the chosen model on data the inner loop never saw.
+
+# %%
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+
+Xncv, yncv, _ = io.load_bnci_2a_epochs(subjects=[1])
+Fncv = ft.bandpower(Xncv, sf)
+C_grid = np.logspace(-3, 3, 13)   # 13 candidate hyper-parameters to choose from
+inner = StratifiedKFold(5, shuffle=False)
+
+# %% [markdown]
+# ### ⚠️ WRONG: grid-search, then report the *winning* configuration's own CV score
+
+# %%
+cv_scores = [cross_val_score(SVC(C=c), Fncv, yncv, cv=inner).mean() for c in C_grid]
+wrong7 = float(np.max(cv_scores))   # we picked C *because* it maxed this very score
+print(f"⚠️ WRONG (best of {len(C_grid)} configs, same CV) accuracy = {wrong7:.3f}")
+
+# %% [markdown]
+# **Why it's inflated:** you used the evaluation score to *choose* the model, then
+# quoted that same score as the result. With 13 tries, the maximum catches a lucky
+# fold split — and with the dozens of preprocessing/model choices a real project
+# explores, the inflation compounds. (Try widening `C_grid`: the gap grows.)
+
+# %% [markdown]
+# ### ✅ RIGHT: nested CV — choose inside, score outside
+
+# %%
+outer = StratifiedKFold(5, shuffle=False)
+nested = []
+for tr, te in outer.split(Fncv, yncv):
+    gs = GridSearchCV(SVC(), {"C": C_grid}, cv=StratifiedKFold(4, shuffle=False))
+    gs.fit(Fncv[tr], yncv[tr])                 # choose C on TRAIN only
+    nested.append(gs.score(Fncv[te], yncv[te]))  # score on untouched TEST fold
+right7 = float(np.mean(nested))
+print(f"✅ RIGHT (nested CV) accuracy = {right7:.3f}   honest drop = {wrong7 - right7:+.3f}")
+scoreboard["7. Tuning on\ntest (nested CV)"] = (wrong7, right7)
+
+# %% [markdown]
+# > **Takeaway 7:** Never report a score you also used to *select* the model. Choosing
+# > hyper-parameters / preprocessing / the model itself is part of training — wrap it
+# > in **nested CV** (or a separate validation set). The drop here looks small on one
+# > subject, but selection bias is the most common way honest-looking papers inflate.
+
+# %% [markdown]
+# ---
 # # The whole story in one figure
 #
 # Every pitfall, WRONG (red) vs RIGHT (green). In each pair the red bar is the
@@ -410,7 +487,7 @@ for xi, (w, r) in enumerate(zip(wrongs, rights)):
     ax.text(xi + 0.2, r + 0.01, f"{r:.2f}", ha="center", fontsize=8)
 ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=8)
 ax.set_ylabel("Score"); ax.set_ylim(0, 1.05)
-ax.set_title("Six ways evaluation lies — and the honest number in each case")
+ax.set_title("Seven ways evaluation lies — and the honest number in each case")
 ax.legend(); plt.tight_layout(); plt.show()
 
 # %% [markdown]
@@ -421,7 +498,8 @@ ax.legend(); plt.tight_layout(); plt.show()
 # DATA SPLITTING
 # [ ] No random-shuffle split on time series / epochs (use block- or subject-aware).
 # [ ] Whole trials/blocks stay on one side of the split.
-# [ ] Headline metric is subject-INDEPENDENT (Leave-One-Subject-Out).
+# [ ] Evaluation matches the DEPLOYMENT CLAIM (LOSO if "new users"; leak-free
+#     within-subject if "after calibration") — and is LABELLED as which.
 # [ ] (If continuous) a gap/purge separates train and test in time.
 #
 # LEAKAGE
@@ -453,6 +531,7 @@ ax.legend(); plt.tight_layout(); plt.show()
 # | 4 | Accuracy on imbalanced classes | Balanced accuracy / F1 / ROC-AUC + confusion matrix |
 # | 5 | Test on the same session as training | Test across sessions/days/devices/subjects |
 # | 6 | One run, report the best number | Mean ± std over folds/seeds + paired test |
+# | 7 | Tuning / model-picking on the test score | Nested CV (choose inside, score outside) |
 #
 # > **The big idea:** in neural-signal ML, the honest number is almost always
 # > *lower* than the first number you get. Chasing the drop — not the peak — is what

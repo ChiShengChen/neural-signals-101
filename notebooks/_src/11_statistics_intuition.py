@@ -369,6 +369,43 @@ print("=> Small test sets + imbalanced classes = very unreliable evaluation.")
 #   *and* classes are skewed — the binomial distribution has a long right tail.
 
 # %% [markdown]
+# ### Section 3b — "Is my accuracy *significantly* above chance?" (binomial test)
+#
+# Because a small test set is noisy, you should ask whether your accuracy could have
+# arisen *by luck* at true chance. With `n` test trials and `k` correct, the number
+# correct under a chance model is **Binomial(n, p_chance)**. Two beginner-friendly tools:
+#
+# 1. A **binomial test** p-value: the probability of doing *this well or better* by luck.
+# 2. The **lower confidence bound** on your accuracy — the [Müller-Putz et al. 2008]
+#    rule of thumb for BCI: report accuracy with its confidence interval, and only
+#    claim "above chance" if the **lower bound exceeds the chance level**.
+
+# %%
+from scipy import stats as _st
+
+
+def acc_above_chance(k_correct, n_trials, p_chance=0.5, conf=0.95):
+    """Binomial test + Wilson lower bound for a classification accuracy."""
+    acc = k_correct / n_trials
+    p_value = _st.binomtest(k_correct, n_trials, p_chance, alternative="greater").pvalue
+    lo, hi = _st.binom.interval(conf, n_trials, acc)  # rough CI on the count
+    return acc, p_value, lo / n_trials, hi / n_trials
+
+
+for n_trials in (20, 100, 400):
+    k = round(0.65 * n_trials)  # a model that truly scores 65%
+    acc, p, lo, hi = acc_above_chance(k, n_trials, p_chance=0.5)
+    verdict = "ABOVE chance" if lo > 0.5 else "NOT distinguishable from chance"
+    print(f"n={n_trials:4d}: acc={acc:.2f}  95% CI≈[{lo:.2f},{hi:.2f}]  "
+          f"binom p={p:.1e}  -> {verdict}")
+
+# %% [markdown]
+# Notice the *same* 0.65 accuracy is convincingly above chance with 400 trials but
+# **its confidence interval straddles 0.50 with only 20 trials** — identical point
+# estimate, opposite conclusion. This is why tiny BCI test sets demand a chance test,
+# not just a number.
+
+# %% [markdown]
 # ---
 # ## Section 4 — A small gap between two bars is probably noise
 #
@@ -493,6 +530,47 @@ print("Reporting just the means without a test would be misleading.")
 # - [ ] Report the p-value; if p > 0.05, say "no significant difference".
 # - [ ] Ideally also report effect size (Cohen's d) and confidence interval on
 #       the *difference*.
+
+# %% [markdown]
+# ### Section 4b — Cross-validation breaks the t-test's assumptions (and how to fix it)
+#
+# Here's a subtlety almost everyone gets wrong. A standard paired t-test assumes the
+# fold scores are **independent**. But in k-fold CV the training sets *overlap*
+# heavily (any two folds share most of their training data), so the fold differences
+# are **correlated**. That makes the naive t-test **over-confident** — it reports
+# *smaller* p-values than it should, so you "find" improvements that aren't real.
+#
+# **Nadeau & Bengio (2003)** give a corrected variance that accounts for the
+# train/test overlap. It's a one-line fix and it should be your default when comparing
+# models across CV folds.
+
+# %%
+def corrected_resampled_ttest(diffs, n_train, n_test):
+    """Nadeau-Bengio variance-corrected paired t-test for overlapping CV folds.
+
+    `diffs` are the per-fold score differences (model B - model A); `n_train`/`n_test`
+    are the number of samples in each fold's train/test split.
+    """
+    diffs = np.asarray(diffs, float)
+    n = len(diffs)
+    mean, var = diffs.mean(), diffs.var(ddof=1)
+    corrected_var = var * (1.0 / n + n_test / n_train)   # the correction term
+    if corrected_var <= 0:
+        return 0.0, 1.0
+    t = mean / np.sqrt(corrected_var)
+    p = 2 * stats.t.sf(abs(t), df=n - 1)
+    return t, p
+
+
+diffs = fold_accs_B - fold_accs_A
+n_total = 100  # pretend each fold tests on ~1/9 of 100 samples
+n_test = n_total // n_folds
+n_train = n_total - n_test
+t_corr, p_corr = corrected_resampled_ttest(diffs, n_train, n_test)
+print(f"naive paired t-test     : p = {p_ttest:.3f}")
+print(f"corrected (Nadeau-Bengio): p = {p_corr:.3f}   <- larger = more honest")
+print("The correction widens the p-value: overlapping CV folds are NOT independent,")
+print("so the naive test overstates significance. Use the corrected one by default.")
 
 # %% [markdown]
 # ---
