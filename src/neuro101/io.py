@@ -262,7 +262,7 @@ def load_sleep_edf_epochs(
     Returns ``(X, y, subjects)`` with ``X`` of shape (n_epochs, 1, n_times).
     Labels: 0=Wake, 1=N1, 2=N2, 3=N3, 4=REM (see :data:`SLEEP_STAGE_NAMES`).
     The class distribution is naturally imbalanced (lots of N2) — used in the
-    Chapter 09 metrics demo. First call downloads ~8 MB per recording.
+    Chapter 12 metrics demo. First call downloads ~8 MB per recording.
     """
     from mne.datasets.sleep_physionet.age import fetch_data
 

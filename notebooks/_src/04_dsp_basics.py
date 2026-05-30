@@ -7,7 +7,7 @@
 # ---
 
 # %% [markdown]
-# # Chapter 02 — Digital Signal Processing (DSP) Basics
+# # Chapter 04 — Digital Signal Processing (DSP) Basics
 #
 # **Do not skip this chapter.** Almost every later mistake (and every later
 # feature) rests on these ideas. We will build each one with a picture.
@@ -17,6 +17,9 @@
 # 2. **Quantization**: turning continuous voltage into numbers.
 # 3. **Filters** (FIR vs IIR), **band-pass**, and the **50/60 Hz notch**.
 # 4. **Re-referencing** and **montage**: what "channel value" even means in EEG.
+#
+# > **Prerequisites:** Chapter 03.
+# > **Difficulty:** ★★★☆☆
 #
 # **Runtime:** ~1 min (mostly synthetic signals so the maths is crystal clear).
 
@@ -131,6 +134,10 @@ plt.tight_layout(); plt.show()
 # %% [markdown]
 # ### See the filter work in the frequency domain
 # The clearest proof a filter did its job is the **power spectrum** before/after.
+#
+# > **Before running:** guess what you will see at 50 Hz in the power spectrum after
+# > the 8–30 Hz band-pass — will it be fully gone, partially attenuated, or unchanged?
+# > Also guess whether the 0.3 Hz drift peak will still be visible.
 
 # %%
 from scipy.signal import welch
@@ -176,12 +183,29 @@ for a in axes: a.set_xlabel("Time (s)")
 plt.tight_layout(); plt.show()
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# 1. A signal contains a 90 Hz component and is sampled at 100 Hz (Nyquist = 50 Hz).
+#    At what frequency will the alias appear in the recorded data?
+# 2. You apply a high-pass filter at 1 Hz before epoching ERP data. Name one
+#    consequence this could have on a slow cortical potential peaking at 0.5 Hz.
+# 3. After average referencing, what is the mathematical guarantee about the
+#    across-channel mean at every time point?
+#
+# **Answers:**
+# 1. The alias appears at |90 − 100| = 10 Hz — a fake 10 Hz oscillation.
+# 2. The 1 Hz high-pass will attenuate (and distort) the 0.5 Hz ERP component,
+#    potentially inverting or eliminating the effect you want to measure.
+# 3. After average referencing the across-channel mean is exactly zero at every
+#    sample (by construction: you subtracted the mean from every channel).
+
+# %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong
 #
 # - **Downsampling without an anti-aliasing filter.** You permanently fold
 #   high-frequency content into your band of interest. Always low-pass first.
 # - **Filtering too aggressively, then doing connectivity/causality.** Sharp IIR
-#   filters distort phase; phase-based features (PLV, Chapter 05) become garbage.
+#   filters distort phase; phase-based features (PLV, Chapter 07) become garbage.
 #   Use zero-phase (`filtfilt`) or FIR linear-phase filters.
 # - **High-pass at too high a cutoff (e.g. 2 Hz) for slow signals (ERPs).** You can
 #   filter away the very effect you want to measure.
@@ -190,5 +214,5 @@ plt.tight_layout(); plt.show()
 # - **Notching at 50 Hz when your mains is 60 Hz (or vice-versa).** Match your
 #   region: 50 Hz in Europe/Asia/Africa, 60 Hz in the Americas.
 #
-# **Next:** Chapter 03 — removing real biological artefacts (blinks, muscle) with
+# **Next:** Chapter 05 — removing real biological artefacts (blinks, muscle) with
 # ICA and friends, on the *same* segment so you can see before/after.

@@ -19,10 +19,13 @@
 # 3. Download and plot a sample from each public dataset used in this tutorial.
 # 4. Understand how this repo keeps everything **reproducible** and **CPU-friendly**.
 #
+# > **Prerequisites:** none — start here.
+# > **Difficulty:** ★☆☆☆☆
 # > **Runtime:** ~3–5 min the *first* time (downloads are cached afterwards). In
 # > "smoke mode" (`NEURO101_SMOKE=1`, used by CI) the largest download is skipped.
 #
-# No prior neuroscience needed. Every term is defined on first use.
+# No prior neuroscience needed. Every term is defined on first use. New to the
+# jargon? Keep [`docs/GLOSSARY.md`](../docs/GLOSSARY.md) open in another tab.
 
 # %% [markdown]
 # ## The Python ecosystem we use
@@ -129,11 +132,59 @@ viz.plot_signal(Xb[0, 0], sf_b, title="BCI IV 2a — one channel of one motor-im
 plt.show()
 
 # %% [markdown]
+# ## ⭐ The array-shape mental model (read this twice)
+#
+# Almost every beginner bug in EEG code is a **shape bug**: an axis wired the wrong
+# way, a silent broadcast, or a stray transpose. Build the mental model now and
+# you will save yourself hours later.
+#
+# Our epoched data is always a **3-D array** with this meaning:
+#
+# ```
+#            axis 0          axis 1           axis 2
+#   X  =  ( n_trials  ,   n_channels   ,    n_times   )
+#          "which        "which            "which time
+#           trial?"       electrode?"       sample?"
+# ```
+#
+# - **`X[i]`** → one trial: a 2-D `(channels, times)` slice.
+# - **`X[i, c]`** → one channel of one trial: a 1-D time series (what we plotted).
+# - **`X[:, c, :]`** → channel `c` for *every* trial.
+# - **`X.mean(axis=2)`** → average over **time** → `(trials, channels)`.
+# - **`X.mean(axis=0)`** → average over **trials** → `(channels, times)` (an ERP).
+#
+# The labels line up with **axis 0**: `y` has shape `(n_trials,)`, and `y[i]` is the
+# label of `X[i]`. Keep that pairing sacred — if you ever reorder trials, reorder
+# `y` the same way.
+
+# %%
+print("X shape:", Xb.shape, " -> (n_trials, n_channels, n_times)")
+print("one trial   X[0]    :", Xb[0].shape, "  (channels, times)")
+print("one channel X[0, 0] :", Xb[0, 0].shape, "  (times,) -> a 1-D signal")
+print("labels      y       :", yb.shape, " -> one label per trial; y[0] =", yb[0])
+
+# A classic silent bug: averaging over the WRONG axis.
+over_time = Xb.mean(axis=2)      # correct: collapse time -> (trials, channels)
+over_trials = Xb.mean(axis=0)    # different meaning: an average trial (channels, times)
+print("\nmean over time  (axis=2):", over_time.shape, "= one number per channel per trial")
+print("mean over trials(axis=0):", over_trials.shape, "= the average trial (an ERP)")
+print("These are NOT interchangeable — picking the wrong axis silently gives garbage.")
+
+# %% [markdown]
+# > **Broadcasting & transpose traps.** NumPy will happily *broadcast* a
+# > `(channels, 1)` array against `(channels, times)` without complaint — convenient,
+# > but it also means a wrong-shaped array can produce numbers instead of an error.
+# > And `X[i].T` (transpose to `(times, channels)`) is exactly what some libraries
+# > want and others reject — always check what shape a function expects. **When a
+# > result looks weird, print `.shape` first.** It is the fastest debugging habit in
+# > all of neural-signal ML. (See `docs/TROUBLESHOOTING.md` for the common errors.)
+
+# %% [markdown]
 # ## Dataset 3 — Sleep-EDF (used later for sleep staging & class imbalance)
 #
 # Overnight recordings with expert **sleep-stage** labels. We load one night and
 # show how many 30-second epochs fall in each stage — notice the classes are very
-# **imbalanced** (lots of N2). We will use exactly this imbalance in Chapter 09
+# **imbalanced** (lots of N2). We will use exactly this imbalance in Chapter 12
 # to show why *accuracy* can lie.
 
 # %%

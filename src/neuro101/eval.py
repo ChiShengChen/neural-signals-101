@@ -80,7 +80,7 @@ def make_subject_split(
     Notes
     -----
     Use this — never ``sklearn.model_selection.train_test_split(shuffle=True)`` —
-    on grouped neural data. See Chapter 09, pitfall #2.
+    on grouped neural data. See Chapter 12, pitfall #2.
 
     Examples
     --------
@@ -161,7 +161,7 @@ def make_block_split(
 
     Notes
     -----
-    Use this for within-subject evaluation. See Chapter 09, pitfall #1.
+    Use this for within-subject evaluation. See Chapter 12, pitfall #1.
 
     Examples
     --------
@@ -234,7 +234,7 @@ def leakage_safe_pipeline(
     filters, class info) never leak into training.
 
     The common mistake this prevents: calling ``scaler.fit_transform(X)`` or
-    ``CSP().fit(X, y)`` on the *whole* dataset before splitting. See Chapter 09,
+    ``CSP().fit(X, y)`` on the *whole* dataset before splitting. See Chapter 12,
     pitfall #3 — the honest score is lower but real.
 
     Parameters
@@ -295,7 +295,7 @@ def evaluate_with_variance(
     cross-validation over several random seeds, re-fitting a fresh clone of the
     estimator on each fold, and returns mean, standard deviation and the raw
     per-fold/per-seed scores so that a paired statistical test across folds is
-    possible. This is the antidote to the "lucky seed" pitfall (Chapter 09,
+    possible. This is the antidote to the "lucky seed" pitfall (Chapter 12,
     pitfall #6).
 
     Parameters

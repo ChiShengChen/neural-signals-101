@@ -7,7 +7,7 @@
 # ---
 
 # %% [markdown]
-# # Chapter 04 — The Frequency Domain
+# # Chapter 06 — The Frequency Domain
 #
 # Brain rhythms live in frequency bands, so frequency analysis is central to
 # neural signal processing. We'll build the FFT, Welch PSD, the spectrogram and
@@ -18,6 +18,9 @@
 # 2. **STFT / spectrogram** and **wavelets**: how that distribution changes over time.
 # 3. **Band power** (delta/theta/alpha/beta/gamma) as features.
 # 4. The **time–frequency trade-off**: you cannot have perfect resolution in both.
+#
+# > **Prerequisites:** Chapters 03 and 04.
+# > **Difficulty:** ★★★☆☆
 #
 # **Runtime:** ~1 min.
 
@@ -107,6 +110,10 @@ fig.colorbar(im, ax=ax, fraction=0.025); plt.show()
 #
 # We build a **chirp** (a tone whose frequency rises over time) so the spectrogram
 # clearly shows a diagonal ridge.
+#
+# > **Before running:** guess the shape of the chirp's ridge in the spectrogram — will
+# > it be a flat horizontal line, a diagonal line rising from bottom-left to top-right,
+# > or a curved arc? Sketch your prediction, then compare to the output.
 
 # %%
 t = np.arange(0, 4, 1 / sf)
@@ -152,6 +159,32 @@ ax.set(ylim=(0, 60), xlabel="Time (s)", ylabel="Frequency (Hz)",
 plt.show()
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# 1. Welch's method averages spectra computed on overlapping windows. Doubling the
+#    number of windows (by halving the window length) improves frequency or time
+#    resolution — which one, and why?
+# 2. The alpha band is typically 8–13 Hz. If you compare absolute alpha power between
+#    two subjects and subject A has much thicker skull, what confound arises and how
+#    would you address it?
+# 3. A short STFT window gives good time resolution but poor frequency resolution.
+#    Name one brain-science scenario where you would deliberately choose a short
+#    window despite its poor frequency resolution.
+#
+# **Answers:**
+# 1. Halving the window length halves frequency resolution (fewer samples → coarser
+#    frequency bins) but the variance of each estimate decreases because more windows
+#    are averaged. You trade frequency resolution for statistical stability, not time
+#    resolution (the window position still determines time resolution).
+# 2. Thicker skull attenuates the EEG signal, so subject A will show lower absolute
+#    power even if their actual brain alpha is the same. Use relative band power
+#    (alpha ÷ total broadband power) to normalise across individuals.
+# 3. Any scenario where *when* an event happens matters more than *exactly which*
+#    frequency — for example, detecting the onset of a motor-evoked high-gamma burst
+#    (> 70 Hz) where millisecond timing is critical and the exact frequency within
+#    the gamma band is less important.
+
+# %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong
 #
 # - **Reading a single noisy FFT as truth.** Use Welch (averaging) or you'll chase
@@ -166,5 +199,5 @@ plt.show()
 # - **Mismatched `nperseg` and sampling rate.** A window of 256 samples means a
 #   different duration at 100 Hz vs 250 Hz. Think in *seconds*, then convert.
 #
-# **Next:** Chapter 05 — turning these spectra (and more) into features:
+# **Next:** Chapter 07 — turning these spectra (and more) into features:
 # connectivity, CSP, and Riemannian covariance.

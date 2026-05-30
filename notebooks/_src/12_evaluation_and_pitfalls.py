@@ -7,7 +7,7 @@
 # ---
 
 # %% [markdown]
-# # Chapter 09 — Evaluation & Pitfalls  ⭐ (the most important chapter)
+# # Chapter 12 — Evaluation & Pitfalls  ⭐ (the most important chapter)
 #
 # Almost every "amazing" neural-decoding result that fails to reproduce died of one
 # of the mistakes below. We teach each one as a **WRONG → RIGHT pair**:
@@ -27,6 +27,9 @@
 # 4. Class imbalance & the wrong metric.
 # 5. Cross-session / domain shift.
 # 6. Lucky seed / no variance reporting.
+#
+# > **Prerequisites:** Chapters 02, 08 and 11.
+# > **Difficulty:** ★★★★☆
 #
 # **Runtime:** ~2–4 min on CPU (smoke mode shrinks data).
 
@@ -372,6 +375,10 @@ if len(fold_csp) == len(fold_riem) and len(fold_csp) >= 3:
 #
 # Every pitfall, WRONG (red) vs RIGHT (green). In each pair the red bar is the
 # number you'd be tempted to publish; the green bar is the truth.
+#
+# > **Before running:** guess how large the WRONG-vs-RIGHT accuracy gap will be for
+# > Pitfall 3 (feature leakage on pure noise) — do you expect the inflated score to
+# > be near 0.6, 0.7, 0.8, or higher, given that 2000 random features were available?
 
 # %%
 labels = list(scoreboard)
@@ -435,6 +442,33 @@ ax.legend(); plt.tight_layout(); plt.show()
 # > separates results that ship from results that vanish.
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# 1. In Pitfall 1, overlapping windows from the same trial are split randomly.
+#    Name the statistical property that makes this splitting strategy invalid for
+#    time-series data and explain why it inflates the score.
+# 2. You have a 4-class dataset where one class makes up 70% of trials. Your model
+#    achieves 72% accuracy. Without looking at the confusion matrix, why can you not
+#    conclude the model is useful?
+# 3. A colleague reports a paired t-test between CSP+LDA and a deep net across 9
+#    held-out subjects, obtaining p = 0.04 and a mean difference of +1.2%. Should
+#    you treat this as a meaningful improvement? What additional information do you need?
+#
+# **Answers:**
+# 1. Adjacent overlapping windows share most of their samples, making them highly
+#    autocorrelated. Random splitting places near-duplicate windows on both sides of
+#    the train/test boundary, so the model can "recognise" a test window by its
+#    near-twin in training — inflating accuracy through memorisation, not generalisation.
+# 2. A model that always predicts the majority class would achieve ~70% accuracy
+#    without learning anything. You need balanced accuracy, F1, and the confusion
+#    matrix to determine whether the model actually detects the minority classes.
+# 3. Statistical significance (p = 0.04) does not imply practical significance.
+#    With only 9 folds the test has low power, and a 1.2% mean difference is likely
+#    smaller than the standard deviation across subjects. You need the effect size
+#    (mean ± std of per-subject differences) and should check whether the result
+#    survives correction for multiple comparisons across all models you tested.
+
+# %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong (meta)
 #
 # - **Treating this chapter as optional.** It is the difference between real and
@@ -443,4 +477,6 @@ ax.legend(); plt.tight_layout(); plt.show()
 # - **Reporting the WRONG numbers above as if they were achievements.** Every red
 #   bar here is a cautionary tale, not a benchmark.
 #
-# **Next:** Chapter 10 — the capstone, where you build a leakage-free report yourself.
+# **Next:** Chapter 13 — *neuroethics & anti-hype*: over-claiming to the public is
+# the ethical twin of leakage. Then Chapter 14 — the capstone, where you build a
+# leakage-free report yourself against a hidden held-out set.

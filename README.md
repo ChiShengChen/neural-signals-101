@@ -1,14 +1,22 @@
 # ML & Signal Processing on Neural Signals 101 (Python)
 
 > Go from **raw brain recordings → preprocessing → features → models → an honest
-> score**, entirely through runnable Jupyter notebooks. Built for engineers and ML
-> practitioners who are new to neural signals. Every term is defined on first use;
-> no unexplained acronyms.
+> score**, entirely through runnable Jupyter notebooks. **Built for university
+> students new to neuro-AI/ML** — you only need basic Python. We assume **no** prior
+> machine learning *and* no neuroscience: every term is defined on first use, the
+> maths is shown visually (no proofs), and there's a [glossary](docs/GLOSSARY.md)
+> and a [troubleshooting guide](docs/TROUBLESHOOTING.md) for when you get stuck.
 
 The single most important thing this tutorial teaches is **how not to fool
-yourself**. Most "amazing" brain-decoding results quietly leak information and
-collapse when reproduced. We show you exactly how that happens — and how to get
-the honest number instead.
+yourself**. For a beginner that starts earlier than you'd think: reading a number
+without knowing what it means, wiring an array shape wrong and trusting the garbage,
+or believing a hyped headline. We build those reflexes first (Chapters 02, 03, 11),
+*then* tackle the subtle one — **data leakage** — that makes most "amazing"
+brain-decoding results collapse when reproduced (Chapter 12). Over-claiming to the
+public is its ethical twin (Chapter 13).
+
+> 📚 New here? See [`docs/CURRICULUM.md`](docs/CURRICULUM.md) for the full learning
+> design and rationale.
 
 ![Inflated vs honest score](docs/headline.png)
 
@@ -78,34 +86,43 @@ jupyter notebook notebooks/   # or: make run-all   to execute them all headless
 - **Everything runs on CPU in ~5 minutes per notebook.** Data is subsampled and we
   always tell you when. Set `NEURO101_SMOKE=1` to use the smallest slices.
 
-### Two learning paths
+### Learning paths
 
-| If you come from… | Suggested path |
+| If you are… | Suggested path |
 |---|---|
-| **Machine learning** (you know sklearn/PyTorch, signals are new) | Skim **Ch 1–3** for intuition, then focus on **Ch 6–9** (proper CV, deep models, and — above all — the pitfalls). |
-| **Neuroscience / signals** (you know EEG, ML is new) | Focus on **Ch 1–5** (the signal & feature foundations), then read **Ch 6** and **Ch 9** carefully for the ML evaluation discipline. |
+| **A total beginner** (the design target) | Do **00 → 14 in order**. Chapter 15 is an optional appendix. |
+| **Comfortable with ML, new to signals** | Skim **02**, do **03**; focus **01, 04–07, 10, 12, 13**. |
+| **Comfortable with neuro, new to ML** | Skim **01**; do **02, 03, 11**; focus **04–09, 12**. |
 
-Everyone should read **Chapter 09** — it is the point of the whole tutorial.
+**Everyone reads Chapter 12 (evaluation pitfalls) and Chapter 13 (ethics & anti-hype)** —
+they are the point of the whole tutorial.
 
 ---
 
 ## Chapters (with estimated runtime)
 
-| # | Notebook | What it covers | First-run time* |
-|---|---|---|---|
-| 00 | [Setup & data](notebooks/00_setup_and_data.ipynb) | Ecosystem, file formats, load & plot every dataset | ~3–5 min |
-| 01 | [What neural signals are](notebooks/01_what_are_neural_signals.ipynb) | EEG/MEG/ECoG/LFP/spikes/fNIRS/EMG; where the noise is | ~1 min |
-| 02 | [DSP basics](notebooks/02_dsp_basics.ipynb) | Sampling, aliasing, quantization, filters, notch, referencing | ~1 min |
-| 03 | [Preprocessing & denoising](notebooks/03_preprocessing_and_denoising.ipynb) | Artefacts, ICA, ASR-style cleaning, epoching, baseline | ~1–2 min |
-| 04 | [Frequency domain](notebooks/04_frequency_domain.ipynb) | FFT, Welch PSD, STFT, wavelets, band power, time–freq trade-off | ~1 min |
-| 05 | [Feature engineering](notebooks/05_feature_engineering.ipynb) | Time/freq/connectivity features, CSP, Riemannian covariance | ~1–2 min |
-| 06 | [Classical ML](notebooks/06_classical_ml.ipynb) | LDA/SVM/RF/Riemann via Pipelines, **proper cross-validation** | ~2–3 min |
-| 07 | [Deep learning](notebooks/07_deep_learning.ipynb) | EEGNet, ShallowConvNet, DeepConvNet, LSTM, tiny Transformer | ~3–5 min |
-| 08 | [Paradigms & applications](notebooks/08_paradigms_and_applications.ipynb) | MI, P300/ERP, SSVEP, sleep staging, seizure, brain-to-text | ~2–3 min |
-| 09 | [**Evaluation & pitfalls**](notebooks/09_evaluation_and_pitfalls.ipynb) ⭐ | Six WRONG→RIGHT pairs; the most important chapter | ~2–4 min |
-| 10 | [Capstone](notebooks/10_capstone.ipynb) | Raw → honest report, with TODOs you fill in | ~2–4 min |
+| # | Notebook | What it covers | Diff | First-run time* |
+|---|---|---|---|---|
+| 00 | [Setup & data](notebooks/00_setup_and_data.ipynb) | Ecosystem, file formats, load & plot data, **the array-shape mental model** | ★ | ~3–5 min |
+| 01 | [What neural signals are](notebooks/01_what_are_neural_signals.ipynb) | EEG physical origin, volume conduction, 10-20 system, where the noise is | ★★ | ~1 min |
+| 02 | [**ML from zero**](notebooks/02_ml_from_zero.ipynb) 🆕 | Overfitting, train/val/test, *why the test set is sacred* (toy data, no EEG) | ★★ | ~1 min |
+| 03 | [**Math you can see**](notebooks/03_math_you_can_see.ipynb) 🆕 | Fourier, covariance, eigenvectors/CSP geometry — visual, no proofs | ★★★ | ~1 min |
+| 04 | [DSP basics](notebooks/04_dsp_basics.ipynb) | Sampling, aliasing, quantization, filters, notch, referencing | ★★★ | ~1 min |
+| 05 | [Preprocessing & denoising](notebooks/05_preprocessing_and_denoising.ipynb) | Artefacts, ICA, ASR-style cleaning, epoching, baseline | ★★★ | ~1–2 min |
+| 06 | [Frequency domain](notebooks/06_frequency_domain.ipynb) | FFT, Welch PSD, STFT, wavelets, band power, time–freq trade-off | ★★★ | ~1 min |
+| 07 | [Feature engineering](notebooks/07_feature_engineering.ipynb) | Features **tied to physiology** (ERD/ERS), CSP, Riemannian covariance | ★★★★ | ~1–2 min |
+| 08 | [Classical ML](notebooks/08_classical_ml.ipynb) | LDA/SVM/RF/Riemann via Pipelines, **proper cross-validation** | ★★★ | ~2–3 min |
+| 09 | [Deep learning](notebooks/09_deep_learning.ipynb) | EEGNet, ShallowConvNet, DeepConvNet, LSTM, tiny Transformer | ★★★★ | ~3–5 min |
+| 10 | [Paradigms & applications](notebooks/10_paradigms_and_applications.ipynb) | MI, P300/ERP, SSVEP, sleep, seizure, brain-to-text — **why each works** | ★★★ | ~2–3 min |
+| 11 | [**Statistics intuition**](notebooks/11_statistics_intuition.ipynb) 🆕 | Sampling variation, mean±std, chance≠1/k, "a small gap is noise" | ★★★ | ~1–2 min |
+| 12 | [**Evaluation & pitfalls**](notebooks/12_evaluation_and_pitfalls.ipynb) ⭐ | Six WRONG→RIGHT pairs; the most important chapter | ★★★★ | ~2–4 min |
+| 13 | [**Neuroethics & anti-hype**](notebooks/13_neuroethics_and_anti_hype.ipynb) 🆕 | Privacy, consent, neuro-rights, "offline 95% ≠ a BCI", hype = leakage's twin | ★★ | ~1 min |
+| 14 | [Capstone](notebooks/14_capstone.ipynb) | Raw → honest report vs a **hidden held-out leaderboard** | ★★★★ | ~2–4 min |
+| 15 | [Real-time & hardware](notebooks/15_realtime_and_hardware.ipynb) 🆕 | Simulated streaming inference + a low-cost hardware path (OpenBCI/Muse) | ★★ | ~1–2 min |
 
-\*First run downloads & caches data; later runs are much faster.
+\*First run downloads & caches data; later runs are much faster. Every chapter has a
+prerequisite + difficulty box, "predict-before-run" cells, and a ✅ concept-check.
+Extra exercises with answers: [`docs/SOLUTIONS.md`](docs/SOLUTIONS.md).
 
 ---
 
@@ -129,10 +146,10 @@ environment variable). See `src/neuro101/datasets.py` for the full registry and
 ```
 README.md                LICENSE (MIT)   CONTRIBUTING.md   requirements.txt   Makefile
 src/neuro101/   io.py preprocessing.py features.py viz.py eval.py datasets.py   (importable, tested)
-notebooks/      00_setup … 10_capstone  (.ipynb, built from notebooks/_src/*.py)
+notebooks/      00_setup … 15_realtime  (.ipynb, built from notebooks/_src/*.py)
 tests/          pytest for src/ + a smoke test that every notebook executes
 scripts/        make_headline_figure.py  build_notebooks.py  run_all_notebooks.py
-docs/           headline.png
+docs/           headline.png  CURRICULUM.md  GLOSSARY.md  TROUBLESHOOTING.md  SOLUTIONS.md
 .github/workflows/ci.yml  (pytest + notebook smoke test on push)
 ```
 

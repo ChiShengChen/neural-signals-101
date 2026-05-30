@@ -7,7 +7,7 @@
 # ---
 
 # %% [markdown]
-# # Chapter 06 — Classical Machine Learning (the right way)
+# # Chapter 08 — Classical Machine Learning (the right way)
 #
 # Now we classify motor imagery with classical models — and we do it **honestly**.
 # The single most important idea in this whole tutorial appears here:
@@ -19,6 +19,9 @@
 # 3. Use the **right cross-validation**: block-aware (within subject) and
 #    Leave-One-Subject-Out (across subjects).
 # 4. Read evaluation **metrics**: accuracy, balanced accuracy, F1.
+#
+# > **Prerequisites:** Chapters 02 and 07.
+# > **Difficulty:** ★★★☆☆
 #
 # **Runtime:** ~2–3 min on CPU.
 
@@ -106,6 +109,10 @@ for name, model in models.items():
 # The honest, deployment-relevant question is: does it work on a **new person**?
 # We hold out each subject in turn (LOSO). Expect **lower** numbers — generalising
 # across brains is hard. This is the metric we report as the headline.
+#
+# > **Before running:** guess whether LOSO accuracy will be higher or lower than the
+# > within-subject block-split accuracy you just saw — and by roughly how many
+# > percentage points do you expect the gap to be?
 
 # %%
 results = {}
@@ -137,13 +144,34 @@ ax.set_ylim(0, 1); plt.setp(ax.get_xticklabels(), rotation=15, ha="right")
 ax.legend(); plt.tight_layout(); plt.show()
 
 # %% [markdown]
-# ## Metrics, briefly (full treatment in Chapter 09)
+# ## Metrics, briefly (full treatment in Chapter 12)
 #
 # - **Accuracy**: fraction correct. Misleading when classes are imbalanced.
 # - **Balanced accuracy**: average recall across classes — fair under imbalance.
 # - **F1**: harmonic mean of precision and recall; good for "did we catch the
 #   positive class without crying wolf".
 # - Always report **variance** (± std over folds/subjects), never a single number.
+
+# %% [markdown]
+# ## ✅ Concept check
+#
+# 1. CSP (Common Spatial Patterns) finds spatial filters that maximise the ratio of
+#    variances between two classes. Why must CSP be fitted *inside* the pipeline's
+#    training fold and not on the entire dataset beforehand?
+# 2. You achieve 95% accuracy within-subject and 55% in LOSO. What does this gap
+#    most likely indicate about the nature of what the model learned?
+# 3. Balanced accuracy is preferred over accuracy when classes are imbalanced.
+#    Write the formula for balanced accuracy in terms of sensitivity and specificity.
+#
+# **Answers:**
+# 1. CSP uses the class labels to compute covariance matrices and their generalised
+#    eigendecomposition. Fitting on the full dataset lets test-fold label information
+#    influence the spatial filters, inflating out-of-fold scores (preprocessing leakage).
+# 2. A large within-subject vs LOSO gap typically means the model learned
+#    subject-specific idiosyncrasies (electrode placement, skull geometry, individual
+#    brain rhythms) rather than generalisable motor-imagery features.
+# 3. Balanced accuracy = (Sensitivity + Specificity) / 2
+#    = (TP/(TP+FN) + TN/(TN+FP)) / 2, i.e. the average recall across both classes.
 
 # %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong
@@ -160,5 +188,5 @@ ax.legend(); plt.tight_layout(); plt.show()
 # - **Tuning hyper-parameters on the test fold.** Use nested CV or a separate
 #   validation split — never peek at test.
 #
-# **Next:** Chapter 07 — deep learning (EEGNet & friends) with braindecode, still
+# **Next:** Chapter 09 — deep learning (EEGNet & friends) with braindecode, still
 # obeying every rule above.

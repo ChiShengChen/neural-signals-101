@@ -7,7 +7,7 @@
 # ---
 
 # %% [markdown]
-# # Chapter 05 — Feature Engineering
+# # Chapter 07 — Feature Engineering
 #
 # A classifier is only as good as the numbers you feed it. This chapter turns raw
 # epochs into **features**: compact descriptions that expose the structure a model
@@ -19,6 +19,9 @@
 # 3. **CSP** (Common Spatial Patterns) for motor imagery.
 # 4. **Riemannian / covariance** features with `pyriemann` — a standard modern baseline.
 # 5. Which features *learn* from data (and so must be fit on train only).
+#
+# > **Prerequisites:** Chapters 03 and 06.
+# > **Difficulty:** ★★★★☆
 #
 # **Runtime:** ~1–2 min (a few BCI IV 2a subjects, cached).
 
@@ -49,7 +52,7 @@ print(f"X={X.shape} (trials, channels, time) @ {sf} Hz | classes={np.bincount(y)
 # - **Learned features** estimate parameters from a *set* of labelled trials
 #   (CSP learns spatial filters; covariance-whitening estimates a reference). These
 #   **must be fit on the training fold only** or they leak. We handle that in
-#   Chapter 06 with pipelines; here we just build them.
+#   Chapter 08 with pipelines; here we just build them.
 
 # %% [markdown]
 # ## 1. Time-domain features
@@ -86,6 +89,63 @@ ax.set(xlabel="Channel index", ylabel="log beta power",
 plt.show()
 
 # %% [markdown]
+# **Reading the plot above (ERD in action):** BCI Competition IV 2a records left-hand
+# vs right-hand *imagined* movements. When you imagine moving your **left** hand, the
+# motor cortex on the **right** hemisphere (contralateral) decreases its beta power —
+# this dip is called **ERD (Event-Related Desynchronization)**. The two coloured lines
+# above should diverge most over central channels (roughly the middle of the x-axis,
+# near C3/Cz/C4): that divergence is the contralateral ERD signature a classifier
+# learns to exploit.
+
+# %% [markdown]
+# ## What these features mean in the brain
+#
+# Features are not just numbers — each one ties to a specific neuroscientific
+# phenomenon. Understanding *why* a feature works makes it much easier to debug a
+# broken classifier or design a better one.
+#
+# ### Band power ↔ brain rhythms
+# The brain generates rhythmic electrical oscillations at characteristic frequencies:
+# - **Alpha (~8–13 Hz):** strongest when your eyes are closed and you are relaxed
+#   ("idling" visual cortex). Opening your eyes suppresses it.
+# - **Mu/Beta (~8–30 Hz) over sensorimotor cortex:** the motor system's equivalent
+#   of alpha. When you are sitting still the sensorimotor cortex hums along at mu/beta
+#   frequencies — a kind of ready-but-idle state.
+#
+# ### ERD / ERS — the core motor-imagery signal
+# **Event-Related Desynchronization (ERD):** as soon as you move *or imagine moving*
+# a hand, the mu/beta rhythm over the **opposite** (contralateral) sensorimotor cortex
+# **drops sharply in power**. The brain is "waking up" that area, and the synchronised
+# idling rhythm breaks apart.
+#
+# **Event-Related Synchronization (ERS):** after the movement ends, power rebounds —
+# sometimes above baseline — as the cortex returns to its resting state.
+#
+# Why contralateral? The motor cortex is anatomically wired so that the **left**
+# hemisphere controls the **right** body side and vice versa. So imagining a left-hand
+# movement desynchronises the *right* sensorimotor cortex, and imagining a right-hand
+# movement desynchronises the *left* sensorimotor cortex. A motor-imagery BCI
+# classifier literally detects which side of the brain has lower beta power.
+#
+# ### CSP ↔ geometry from Chapter 03
+# In Chapter 03 we saw that EEG channels record a **mixture** of underlying sources
+# (because electricity spreads through the skull). CSP finds **spatial filters** —
+# weighted sums of channels — chosen so that one class has high variance and the other
+# has low variance. For left-vs-right hand imagery, the first CSP filter will
+# emphasise channels over the *right* sensorimotor cortex (high variance for left-hand
+# imagery, low for right), and the last filter will do the opposite. The resulting
+# log-variances directly encode the left-vs-right ERD asymmetry in just a handful of
+# numbers.
+#
+# ### Covariance / Riemannian features
+# The channel covariance matrix records the **full spatial pattern** of how every pair
+# of channels co-varies during a trial. When the right sensorimotor cortex
+# desynchronises (left-hand imagery), the correlations involving channels over that
+# region change. The Riemannian approach uses the geometry of the space of covariance
+# matrices to compare these whole-brain co-activation patterns across trials — no hand
+# selection of channels required.
+
+# %% [markdown]
 # ## 3. Connectivity: coherence and PLV
 #
 # Connectivity measures how channels relate, not just their individual power.
@@ -116,6 +176,20 @@ plt.show()
 # feature — we fit it on the whole set here only to *visualise* it; in a real
 # evaluation it goes inside a train-only pipeline.
 
+# %% [markdown]
+# > **Predict before you run:** BCI Competition IV 2a uses left-hand (class 0) and
+# > right-hand (class 1) imagined movements. Based on what you just read about ERD:
+# >
+# > 1. Over which hemisphere do you expect a **beta-power drop** for *left-hand*
+# >    imagery — left or right?
+# > 2. CSP will learn a spatial filter that gives high variance for one class and low
+# >    for the other. Should that filter emphasise channels on the *ipsilateral* (same
+# >    side) or *contralateral* (opposite side) hemisphere relative to the imagined hand?
+# > 3. Do you expect the two CSP scatter-plot clusters to overlap a lot or separate
+# >    cleanly? Why?
+# >
+# > *Run the cell, then check whether the plot matches your prediction.*
+
 # %%
 csp = ft.make_csp(n_components=4)
 F_csp = csp.fit_transform(X, y)   # demo-only fit on all data (see warning below)
@@ -134,7 +208,7 @@ plt.show()
 # > ⚠️ **The `fit_transform(X, y)` above used the WHOLE dataset, including labels.**
 # > That is *feature leakage* and would inflate any score computed afterwards. It
 # > is fine here because we only *plotted* — we did not measure accuracy. In
-# > Chapter 06 we put CSP inside a pipeline so it is re-fit on each training fold.
+# > Chapter 08 we put CSP inside a pipeline so it is re-fit on each training fold.
 
 # %% [markdown]
 # ## 5. Riemannian / covariance features (a strong modern baseline)
@@ -161,11 +235,47 @@ plt.tight_layout(); plt.show()
 # TangentSpace → classifier` pipeline in the next chapter.
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# Test your understanding before moving on.
+#
+# **Question 1 — ERD meaning:** During imagined hand movement, the mu/beta power over
+# the contralateral sensorimotor cortex *decreases*. What is the technical term for
+# this power decrease, and why is it useful for a BCI?
+#
+# **Question 2 — Why contralateral?** A participant imagines moving their *left* hand.
+# Over which hemisphere (left or right) do you expect the strongest beta-power drop,
+# and why?
+#
+# **Question 3 — What CSP optimises:** CSP finds spatial filters by solving a
+# generalised eigenvalue problem on the two class covariance matrices. In plain
+# language, what property of the filtered signal does it maximise for one class while
+# minimising it for the other?
+#
+# ---
+# **Answers:**
+#
+# 1. The power decrease is called **ERD (Event-Related Desynchronization)**. It is
+#    useful because it is a reliable, spatially specific marker that appears even
+#    during *imagined* (not actual) movement — so a classifier can detect movement
+#    intent without any physical action.
+#
+# 2. The strongest beta-power drop occurs over the **right** hemisphere (contralateral
+#    to the left hand). The motor cortex is wired contralaterally: left hand →
+#    right motor cortex → right hemisphere EEG channels show ERD.
+#
+# 3. CSP maximises the **variance** (signal power) of the filtered signal for one class
+#    while simultaneously minimising it for the other. For left-vs-right hand imagery,
+#    this isolates the spatial pattern of channels whose power is high for one class
+#    (e.g., right-hemisphere channels during left-hand imagery) and low for the other —
+#    directly capturing the contralateral ERD asymmetry.
+
+# %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong
 #
 # - **Fitting CSP / covariance whitening / scalers on all data, then evaluating.**
 #   The #1 feature-leakage mistake. Learned features must be fit on the train fold
-#   only (Chapter 06 makes this automatic).
+#   only (Chapter 08 makes this automatic).
 # - **Comparing absolute band power across subjects/sessions.** Use relative power
 #   or per-subject normalisation (fit on train!).
 # - **Throwing thousands of connectivity features at a small dataset.** O(channels²)
@@ -175,5 +285,5 @@ plt.tight_layout(); plt.show()
 # - **Treating CSP as magic.** CSP assumes the discriminative info is in band-power
 #   spatial patterns — great for motor imagery, not for everything.
 #
-# **Next:** Chapter 06 — classical ML with *proper* cross-validation, where these
+# **Next:** Chapter 08 — classical ML with *proper* cross-validation, where these
 # features finally meet a classifier the honest way.

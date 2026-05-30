@@ -7,7 +7,7 @@
 # ---
 
 # %% [markdown]
-# # Chapter 03 — Preprocessing & Denoising
+# # Chapter 05 — Preprocessing & Denoising
 #
 # Real recordings are full of **artefacts**: signals that are not brain activity.
 # This chapter shows how to spot and remove the big ones, and ends with a
@@ -18,6 +18,9 @@
 # 2. Use **ICA** (Independent Component Analysis) to remove eye-blink artefacts.
 # 3. Understand **ASR**-style amplitude cleaning, **epoching** and **baseline correction**.
 # 4. Compare the same segment before and after cleaning.
+#
+# > **Prerequisites:** Chapter 04.
+# > **Difficulty:** ★★★☆☆
 #
 # **Runtime:** ~1–2 min (one small PhysioNet subject; ICA on CPU).
 
@@ -85,6 +88,10 @@ if not eog_idx and frontal is not None:
 #
 # We apply ICA (removing the flagged components) and overlay the same frontal
 # channel before and after. Blink deflections should shrink.
+#
+# > **Before running:** guess whether the ICA removal will completely eliminate the
+# > blink peaks on the frontal channel, or only reduce them — and why a perfect
+# > removal might actually be a warning sign of over-cleaning.
 
 # %%
 raw_ica = raw_clean_filt.copy()
@@ -141,6 +148,26 @@ fig = evoked.plot(spatial_colors=False, show=False)
 plt.show()
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# 1. ICA decomposes the recording into independent components. Why must the number of
+#    components be ≤ the number of EEG channels?
+# 2. Baseline correction subtracts the mean of a pre-stimulus window. What artefact
+#    does this remove, and what assumption does it make about that artefact?
+# 3. You fit ICA on the entire continuous recording (before cross-validation) and use
+#    the resulting component weights as features. Why does this constitute data leakage?
+#
+# **Answers:**
+# 1. ICA solves a system with as many equations as channels; you cannot recover more
+#    independent sources than you have observed mixtures (channels).
+# 2. Baseline correction removes slow DC drift/offset; it assumes the drift is
+#    constant (or slowly varying) within the baseline window and continues into
+#    the epoch — which may not hold for rapid drift changes.
+# 3. ICA learned the mixing matrix using signal statistics from all trials, including
+#    the future test trials. Component activations on test data are therefore
+#    influenced by test-set statistics, violating train/test independence.
+
+# %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong
 #
 # - **Removing too many ICA components.** Each component you delete also removes
@@ -148,7 +175,7 @@ plt.show()
 # - **Fitting ICA / artefact thresholds on the *whole* dataset, then classifying.**
 #   ICA is *unsupervised* so this is less dangerous than supervised leakage, but if
 #   your downstream feature depends on it, fit cleaning **inside** your train fold.
-#   (We make this airtight in Chapter 06 with pipelines.)
+#   (We make this airtight in Chapter 08 with pipelines.)
 # - **Rejecting epochs by eye after seeing the labels.** That biases results. Set
 #   rejection thresholds *before* looking at class membership.
 # - **Skipping baseline correction for ERPs.** Slow drift will dominate and your
@@ -156,5 +183,5 @@ plt.show()
 # - **Over-cleaning.** The goal is *honest* data, not pretty data. A model that only
 #   works on heavily hand-cleaned data won't survive real-time use.
 #
-# **Next:** Chapter 04 — the frequency domain (FFT, PSD, spectrograms, wavelets)
+# **Next:** Chapter 06 — the frequency domain (FFT, PSD, spectrograms, wavelets)
 # and the time–frequency trade-off.

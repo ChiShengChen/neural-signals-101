@@ -3,7 +3,7 @@
 Kept deliberately simple (matplotlib only) and dependency-light. Every function
 returns the matplotlib ``Axes`` (or ``Figure``) so notebooks can tweak it. The
 star of the module is :func:`plot_wrong_vs_right`, which draws the inflated-vs-
-honest score contrast used by the headline figure and Chapter 09.
+honest score contrast used by the headline figure and Chapter 12.
 """
 from __future__ import annotations
 

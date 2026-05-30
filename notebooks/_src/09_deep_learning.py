@@ -7,7 +7,7 @@
 # ---
 
 # %% [markdown]
-# # Chapter 07 — Deep Learning for Neural Signals
+# # Chapter 09 — Deep Learning for Neural Signals
 #
 # Deep nets can learn features end-to-end from raw EEG. We start with the
 # **convolutional** models designed for EEG (EEGNet, ShallowConvNet, DeepConvNet),
@@ -21,6 +21,9 @@
 # 1. Train **EEGNet / ShallowConvNet / DeepConvNet** via `braindecode`.
 # 2. Build a minimal **LSTM** and **Transformer** for EEG in PyTorch.
 # 3. Keep training honest (subject-aware split) and reproducible (seeded).
+#
+# > **Prerequisites:** Chapter 08.
+# > **Difficulty:** ★★★★☆
 #
 # **Runtime:** ~3–5 min on CPU (smoke mode trains for very few epochs).
 
@@ -109,6 +112,10 @@ def train_eval(model, Xtr, ytr, Xte, yte, epochs=EPOCHS, lr=1e-3, batch=32):
 # These convolutional architectures are the standard EEG deep-learning baselines.
 # `braindecode` provides them ready to use. They expect input shaped
 # `(batch, channels, time)`.
+#
+# > **Before running:** guess whether EEGNet, ShallowConvNet, or DeepConvNet will
+# > achieve the highest held-out-subject accuracy — and whether any of them will beat
+# > the CSP+LDA baseline from Chapter 08 on this small dataset.
 
 # %%
 from braindecode.models import EEGNetv4, ShallowFBCSPNet, Deep4Net
@@ -208,6 +215,31 @@ ax.legend(); ax.set_ylim(0, 1); plt.show()
 # than a fancier classifier.*
 
 # %% [markdown]
+# ## ✅ Concept check
+#
+# 1. EEGNet uses a depthwise convolution over channels followed by a separable
+#    convolution over time. What is the main practical advantage of depthwise separable
+#    convolutions compared to standard convolutions for EEG data?
+# 2. The TinyLSTM downsamples time by a factor of 4 before the recurrent layer.
+#    What is the trade-off: what information might be lost, and what is gained?
+# 3. You train EEGNet for 15 epochs, track test accuracy each epoch, and report the
+#    maximum test accuracy achieved at any epoch. Why is this problematic, and what
+#    should you do instead?
+#
+# **Answers:**
+# 1. Depthwise separable convolutions dramatically reduce the number of parameters
+#    (and thus overfitting risk) by factoring a full convolution into a per-channel
+#    spatial filter and a pointwise mixing step — critical when EEG datasets are small.
+# 2. Downsampling by 4 discards high-frequency temporal detail (anything above the
+#    new Nyquist), which could matter for fast gamma-band transients. The gain is
+#    shorter sequences, which reduces training time and alleviates LSTM vanishing
+#    gradients over long inputs.
+# 3. Peeking at test accuracy to choose the best epoch lets test-set performance
+#    guide model selection — this is test-set leakage. Use a separate validation
+#    subject (or validation fold) for early stopping; reserve the test subject
+#    solely for the final reported number.
+
+# %% [markdown]
 # ## ⚠️ Common mistakes / why this is wrong
 #
 # - **Standardising with statistics from the whole dataset.** Compute mean/std on
@@ -216,11 +248,11 @@ ax.legend(); ax.set_ylim(0, 1); plt.show()
 #   split by subject (or block). Deep models leak *just as eagerly*.
 # - **Comparing to classical baselines unfairly.** On small EEG datasets, CSP+LDA
 #   or Riemannian methods often **beat** deep nets. Always include a classical
-#   baseline (Chapter 06) before claiming a deep model is better.
+#   baseline (Chapter 08) before claiming a deep model is better.
 # - **Not seeding.** Deep training is noisy; report mean ± std over seeds for a
 #   fair comparison (we use one seed here only to stay fast).
 # - **Training to a fixed epoch count and reporting the best test accuracy seen.**
 #   That peeks at test — use a validation split for early stopping.
 #
-# **Next:** Chapter 08 — a tour of BCI paradigms (P300, SSVEP, sleep, seizure),
+# **Next:** Chapter 10 — a tour of BCI paradigms (P300, SSVEP, sleep, seizure),
 # one minimal runnable example each.
