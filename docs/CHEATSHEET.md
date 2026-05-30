@@ -1,5 +1,7 @@
 # Neural Signals 101 — One-Page Cheat Sheet
 
+**English** · [繁體中文](zh-TW/CHEATSHEET.md)
+
 Print this. It's the 5% you'll reach for constantly. (Full API: docstrings in
 `src/neuro101/`; full glossary: [`GLOSSARY.md`](GLOSSARY.md).)
 

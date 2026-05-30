@@ -1,5 +1,7 @@
 # Troubleshooting — first aid for the most common time-sinks
 
+**English** · [繁體中文](zh-TW/TROUBLESHOOTING.md)
+
 New to this and something broke? 90% of beginner problems are one of the few below.
 Find your error message and follow the fix.
 

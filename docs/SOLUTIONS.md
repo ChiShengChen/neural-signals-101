@@ -1,5 +1,7 @@
 # Exercises & Solutions
 
+**English** · [繁體中文](zh-TW/SOLUTIONS.md)
+
 Each notebook ends with a **✅ Concept check** (quick questions, answers inline).
 This page adds a few **hands-on exercises** per chapter — try them yourself first,
 then expand the solution. They reuse the repo's helpers (`from neuro101 import ...`).

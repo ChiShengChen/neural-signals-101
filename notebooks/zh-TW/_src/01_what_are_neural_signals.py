@@ -1,0 +1,300 @@
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+# ---
+
+# %% [markdown]
+# [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ChiShengChen/neural-signals-101/blob/main/notebooks/zh-TW/01_what_are_neural_signals.ipynb)
+#
+# > **在 Google Colab 上執行？** 請先執行下一個儲存格——它會安裝所有套件並
+# > 抓取輔助套件。**在本地端執行（執行 `make setup` 之後）？** 下一個
+# > 儲存格不會做任何事；直接執行並繼續即可。
+
+# %%
+# --- Colab 初始化：僅在 Colab 環境中安裝相依套件與 neuro101 套件 ---
+import sys, os
+if "google.colab" in sys.modules:
+    !pip install -q "mne==1.8.0" "moabb==1.2.0" "braindecode==0.8.1" "pyriemann==0.7" "scikit-learn==1.5.2"
+    if not os.path.exists("neural-signals-101"):
+        !git clone -q https://github.com/ChiShengChen/neural-signals-101
+    sys.path.insert(0, os.path.abspath("neural-signals-101/src"))
+    print("Colab 設置完成——請繼續閱讀以下章節。")
+
+# %% [markdown]
+# # 第 01 章 — 什麼是神經訊號
+#
+# 在我們對訊號進行濾波或分類之前，先建立對*我們究竟在測量什麼*以及
+# *雜訊從何而來*的直覺。
+#
+# ## 學習目標
+# 1. 說出主要的神經訊號類型及其**物理來源（physical origin）**。
+# 2. 比較它們在**空間尺度（spatial scale）**、**時間尺度（temporal scale）**
+#    以及**訊雜比（signal-to-noise ratio，SNR）**——訊號相對於雜訊的強度。
+# 3. 觀察真實的 EEG 軌跡並*指出*雜訊所在。
+# 4. 用淺顯的話解釋 **EEG 訊號在物理上的來源**——哪些細胞產生它，以及
+#    為什麼它到達頭皮時會如此微弱。
+#
+# > **先修條件：** 第 00 章。
+# > **難度：** ★★☆☆☆
+#
+# **執行時間：** 約 1 分鐘（使用第 00 章已快取的一個小型 PhysioNet 受試者）。
+
+# %%
+import sys
+from pathlib import Path
+try:
+    import neuro101  # noqa: F401
+except ModuleNotFoundError:
+    _p = Path.cwd()
+    for _ in range(5):
+        if (_p / "src" / "neuro101").exists():
+            sys.path.insert(0, str(_p / "src")); break
+        _p = _p.parent
+    import neuro101  # noqa: F401
+import numpy as np
+import matplotlib.pyplot as plt
+from neuro101 import io, datasets as ds, features as ft
+
+# %% [markdown]
+# ## 神經訊號的類型指南
+#
+# 以下都是測量神經元電（或代謝）活動的方法，但尺度非常不同，各有不同的
+# 取捨關係。
+#
+# | 訊號 | 測量什麼 | 記錄位置 | 空間尺度 | 時間尺度 | 訊雜比（SNR） |
+# |---|---|---|---|---|---|
+# | **EEG** | 許多神經元的總電活動 | 頭皮（非侵入式） | 公分（模糊） | 毫秒（快速） | **低** |
+# | **MEG** | 相同電流產生的磁場 | 頭部外側 | 公分 | 毫秒 | 低至中等 |
+# | **ECoG** | 大腦皮層表面的電活動 | 腦部（手術） | 毫米 | 毫秒 | 高 |
+# | **LFP** | 小群神經元的局部場電位（local field potential） | 組織中的電極 | 次毫米 | 毫秒 | 高 |
+# | **Spikes（峰電位）** | 單一神經元動作電位（action potential） | 緊鄰細胞的電極 | 單一神經元 | 次毫秒 | 高 |
+# | **fNIRS** | 血氧濃度（活動的代理指標） | 頭皮（光學） | 公分 | **秒**（慢速） | 中等 |
+# | **EMG** | 肌肉電活動 | 肌肉上方皮膚 | 肌肉 | 毫秒 | 高 |
+#
+# **核心取捨：** 方法越非侵入式，訊號越模糊且埋在雜訊中。EEG 容易記錄，
+# 但 *SNR 低*；峰電位（spikes）有漂亮的 SNR，但需要將電極放到神經元旁邊。
+
+# %% [markdown]
+# ## EEG 訊號的物理來源
+#
+# ### 產生訊號的細胞
+#
+# 大腦有數十億個神經元，但 EEG 幾乎完全由一種特定類型產生：**大腦皮層錐體
+# 神經元（cortical pyramidal neurons）**。這些細胞又長又細，整齊地排列成
+# 垂直於頭骨的平行柱狀——想像成一把鉛筆全部指向同一個方向。
+#
+# 當錐體神經元接收到其他神經元的輸入時，會產生**突觸後電位（post-synaptic
+# potential，PSP）**——一種緩慢、持續的電壓偏移，持續數十毫秒。來自數千個
+# 相鄰神經元、全部同步的 PSP **疊加**成可檢測的電場，向外擴散穿過組織。
+# *那*就是 EEG 所記錄的。
+#
+# > **為什麼不是動作電位（spikes）？** 峰電位（spikes）很快（~1 ms），
+# > 且在同一個神經元的不同部分有相反的極性，所以當你對數百萬個細胞求和時，
+# > 它們大致相互抵消。PSP 緩慢且空間上相干，所以能夠在加總後存活下來。
+# > EEG 是「慢波」訊號，不是峰電位偵測器。
+#
+# ### 體積傳導（volume conduction）——為什麼鄰近通道高度相關
+#
+# 一旦那個加總的電場存在於大腦內部，它不會停留在一個地方。它向外擴散穿過腦
+# 組織、腦脊髓液（cerebrospinal fluid，CSF）、頭骨和頭皮——這個過程叫做
+# **體積傳導（volume conduction）**。
+#
+# 想像把一塊石頭丟進池塘。漣漪向每個方向擴散。頭骨和頭皮的作用就像一個模糊
+# 的鏡頭：每個大腦訊號源同時「點亮」許多電極，鄰近電極接收到大量重疊的相同
+# 訊號源版本。這是**鄰近 EEG 通道高度相關**的根本原因——它們不是對不同事物
+# 的獨立感測器。
+#
+# *前瞻參考：* 這種空間模糊正是為什麼我們不能隨意打亂或置換 EEG 資料中的
+# 通道/樣本——這樣做會破壞編碼哪個大腦區域活躍的空間結構。我們在第 12 章
+# 會回到這個問題。
+#
+# ### 為什麼單位是微伏（µV）
+#
+# 訊號一開始在皮層內部是毫伏（mV）等級的電壓差。等它穿過約 7 公分的電阻性
+# 組織（腦、CSF、頭骨、頭皮），已被衰減了大約 **1000 倍**，在頭皮留下
+# **數十微伏**。一微伏是百萬分之一伏特——比典型耳機線所接收的電氣雜訊還要小。
+# 這就是為什麼 EEG 放大器必須極其靈敏，以及為什麼即使是小小的眨眼
+# （~100 µV 肌肉偽影）都能淹沒大腦訊號。
+#
+# ### 10-20 電極系統
+#
+# 為了讓 EEG 結果在不同實驗室之間可重現且可比較，研究社群採用了一套標準的
+# 電極放置與命名方案，稱為 **10-20 系統**（數字指的是用來排列電極間距的
+# 頭部距離百分比）。
+#
+# **讀懂電極名稱：**
+# - **字母**告訴你下方的大腦區域：
+#   - **F** = 額葉（Frontal，規劃、注意力）
+#   - **C** = 中央（Central，運動/體感覺皮質帶）
+#   - **T** = 顳葉（Temporal，聽覺、語言）
+#   - **P** = 頂葉（Parietal，空間感知）
+#   - **O** = 枕葉（Occipital，視覺）
+#   - **Fp** = 額極（Frontopolar）；**z** 後綴 = 中線（zero = 中央）
+# - **數字**表示左右：奇數 = 左半球，偶數 = 右半球。
+#   - 因此 **C3** = 中央，左半球；**C4** = 中央，右半球。
+#   - **Cz** = 中央，中線。
+#
+# 本課程中你會常見的地標：**Fz**（額葉中線）、**Cz**（頭頂）、
+# **C3/C4**（運動皮質，在運動想像 BCI 中大量使用）、**Oz**（枕葉中線，
+# 視覺誘發電位）。
+#
+# 以下視覺化顯示標準電極位置：
+
+# %%
+try:
+    import mne
+    mont = mne.channels.make_standard_montage('standard_1020')
+    fig_mont = mont.plot(show=False)
+    fig_mont.suptitle("標準 10-20 電極位置\n"
+                      "（字母 = 大腦區域，奇數 = 左側，偶數 = 右側）",
+                      fontsize=10)
+    plt.show()
+except Exception:
+    # 退回方案：用 matplotlib 繪製簡單示意圖
+    fig, ax = plt.subplots(figsize=(5, 5))
+    circle = plt.Circle((0, 0), 1, color="#e8d5b7", ec="#333", lw=2)
+    ax.add_patch(circle)
+    # 鼻子方向指示器
+    ax.annotate("", xy=(0, 1.15), xytext=(0, 1.0),
+                arrowprops=dict(arrowstyle="-", color="#333", lw=2))
+    electrodes = {
+        "Fz": (0.0, 0.5), "Cz": (0.0, 0.0), "Oz": (0.0, -0.6),
+        "C3": (-0.5, 0.0), "C4": (0.5, 0.0),
+        "F3": (-0.35, 0.45), "F4": (0.35, 0.45),
+        "T7": (-0.85, 0.0), "T8": (0.85, 0.0),
+    }
+    for name, (x, y) in electrodes.items():
+        ax.plot(x, y, "o", ms=12, color="#4c72b0", zorder=3)
+        ax.text(x, y + 0.12, name, ha="center", va="bottom", fontsize=8, fontweight="bold")
+    ax.set_xlim(-1.3, 1.3)
+    ax.set_ylim(-1.3, 1.4)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.set_title("示意圖：10-20 電極位置\n"
+                 "（字母 = 大腦區域，奇數 = 左側，偶數 = 右側）",
+                 fontsize=10)
+    plt.show()
+
+# %% [markdown]
+# ## 數量級（為什麼單位很重要）
+#
+# - **EEG**：數十**微伏（µV，百萬分之一伏特）**。眨眼約 100 µV，
+#   遠遠*超過*你所關心的大腦訊號。
+# - **峰電位（Spikes）**：~100 µV，但在電極尖端，尖銳且短暫（~1 ms）。
+# - **fNIRS**：變化發生在**秒**的尺度，因為血流很慢。
+#
+# 混淆這些尺度（例如把 EEG 當成音訊訊號處理）是初學者的典型錯誤。讓我們
+# 看看真實的 EEG。
+
+# %%
+X, y, subj = io.load_physionet_mi_epochs(n_subjects=1)
+sf = ds.DATASETS["physionet_mi"].sfreq_hz
+print(f"已載入 {X.shape[0]} 個分段，{X.shape[1]} 個通道，每個 {X.shape[2]} 個樣本 @ {sf} Hz")
+
+# %% [markdown]
+# ## 雜訊在哪裡？觀察單一通道
+#
+# 真實的 EEG 是以下的總和：（1）你想要的大腦節律，（2）**生物偽影
+# （biological artefacts）**（眨眼、肌肉、心跳），以及（3）**環境雜訊
+# （environmental noise）**（50/60 Hz 市電干擾、電極漂移）。以下圖形顯示
+# 單一通道；標注指出常見的嫌疑訊號。
+
+# %%
+trial = X[0, 0] * 1e6  # 轉換為 µV 以便讀取座標軸
+t = np.arange(trial.size) / sf
+
+fig, ax = plt.subplots(figsize=(10, 3.5))
+ax.plot(t, trial, lw=0.8, color="#333")
+ax.set(xlabel="時間（秒）", ylabel="振幅（µV）",
+       title="單一 EEG 通道——大腦訊號與雜訊的混合")
+ax.axhline(0, color="gray", lw=0.5)
+plt.show()
+
+# %% [markdown]
+# ## 讓雜訊可見：能量分布在哪裡？
+#
+# 快速「看到」雜訊的方法是觀察能量如何分布在各個頻率上。大腦節律集中在
+# 低頻（< ~30 Hz）；肌肉偽影擴散到高頻；市電干擾在恰好 50 或 60 Hz 處
+# 出現尖銳峰值。
+
+# %% [markdown]
+# ### ✏️ 執行前先預測
+#
+# 在執行以下儲存格之前，花 30 秒寫下你的預測：
+#
+# 1. **能量會集中在哪裡？** 低頻（< 30 Hz）、中頻（30–70 Hz）、高頻
+#    （> 70 Hz），還是均勻分布？
+# 2. **你會在 50 Hz 或 60 Hz 看到尖銳峰值嗎？**（提示：PhysioNet 是美國的
+#    資料集。美國使用哪個市電頻率？）
+# 3. **頻譜看起來會是平坦的（「白色雜訊」）還是在高頻處下降？**
+#
+# 有了猜測之後，執行儲存格並比較結果。主動預測然後驗證，是建立直覺最快的
+# 方法之一。
+
+# %%
+from scipy.signal import welch
+freqs, psd = welch(X[:, 0, :], fs=sf, nperseg=int(sf))  # 每個分段的 PSD，第 0 個通道
+mean_psd = psd.mean(axis=0)
+
+fig, ax = plt.subplots(figsize=(8, 3.5))
+ax.semilogy(freqs, mean_psd, color="#c44e52")
+for f0, name in [(10, "alpha（~10 Hz）\n大腦節律"), (60, "60 Hz\n市電干擾（美國）")]:
+    ax.axvline(f0, ls="--", color="gray", lw=1)
+    ax.text(f0 + 1, mean_psd.max() * 0.3, name, fontsize=8)
+ax.set(xlim=(0, 80), xlabel="頻率（Hz）", ylabel="能量（對數）",
+       title="功率頻譜——大腦節律 vs 雜訊")
+plt.show()
+
+# %% [markdown]
+# ~10 Hz 附近的隆起是 **alpha 節律**（大腦）。50/60 Hz 處的任何尖銳線條
+# 是**市電雜訊**（我們在第 04 章用陷波濾波器去除）。在高頻上升的寬頻能量
+# 通常是**肌肉（EMG）**污染。
+
+# %% [markdown]
+# ## ✅ 概念確認
+#
+# 試著不往回翻地回答這些問題。然後對照以下答案。
+#
+# **Q1.** 為什麼鄰近的 EEG 通道彼此高度相關？
+#
+# **Q2.** EEG 振幅以微伏（µV）而非毫伏（mV）為單位。
+# 為什麼到達頭皮電極時會如此微弱？
+#
+# **Q3.** **C3** 在 10-20 系統中代表什麼？
+# 它在哪個半球上方，字母「C」指的是哪個大腦區域？
+#
+# ---
+#
+# **答案：**
+#
+# **A1.** 因為**體積傳導（volume conduction）**：每個大腦訊號源都將其電場
+# 向外擴散穿過頭骨和頭皮，因此單一訊號源同時激活許多電極。鄰近電極接收到
+# 大量重疊的相同底層訊號源混合——它們*不是*對完全不同事物的獨立感測器。
+#
+# **A2.** 訊號在穿過約 7 公分的電阻性組織（腦、腦脊髓液、頭骨、頭皮）時
+# 被衰減了大約 **1000 倍**。毫伏等級的皮層訊號到達電極時只剩下數十微伏
+# ——比典型音訊線上的雜訊還小。
+#
+# **A3.** **C** = 中央（Central，運動/體感覺皮質帶區域）；
+# **3** = 奇數 = *左*半球。因此 C3 位於左運動皮質上方——控制*右手*的區域。
+# （C4 是鏡像：右半球，控制左手。Cz 是中線頂點。）
+
+# %% [markdown]
+# ## ⚠️ 常見錯誤 / 為什麼這樣做是錯的
+#
+# - **假設訊號是乾淨的。** 從你的模型觀點來看，EEG *大部分是雜訊*。
+#   決定 BCI 準確率的最大單一因素通常是偽影處理，而不是分類器。
+# - **混淆時間尺度。** fNIRS 在秒的尺度上變化；峰電位在毫秒的尺度上。
+#   為一種尺度調整的方法（或取樣率）對另一種是錯誤的。
+# - **將通道視為不同事物的獨立感測器。** 鄰近的 EEG 電極看到*重疊的*
+#   訊號源（體積傳導）——它們高度相關。這正是為什麼我們之後不能自由地
+#   打亂樣本。
+# - **忽略單位。** 報告「振幅 0.00007」而不是「70 µV」會隱藏錯誤。
+#   保持物理單位；確認 EEG 是數十 µV 的量級。
+#
+# **下一章：** 第 02 章——*從零開始的機器學習*：在我們用模型處理訊號之前，
+# 建立機器學習的基本反射（**過擬合（overfitting）**、為什麼測試集是神聖的），
+# 這是教學其餘部分所依賴的基礎。

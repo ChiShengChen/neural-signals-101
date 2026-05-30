@@ -22,6 +22,9 @@ ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIRS = [
     (ROOT / "notebooks" / "_src", ROOT / "notebooks"),
     (ROOT / "deep-dives" / "_src", ROOT / "deep-dives"),
+    # Traditional-Chinese mirrors (same code, translated prose/comments).
+    (ROOT / "notebooks" / "zh-TW" / "_src", ROOT / "notebooks" / "zh-TW"),
+    (ROOT / "deep-dives" / "zh-TW" / "_src", ROOT / "deep-dives" / "zh-TW"),
 ]
 
 

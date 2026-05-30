@@ -1,5 +1,7 @@
 # Getting Started (absolute beginner edition)
 
+**English** · [繁體中文](zh-TW/GETTING_STARTED.md)
+
 Never opened a Jupyter notebook? Not sure if your Python is good enough? Start here.
 This page gets you from *zero* to *running Chapter 00* with no prior experience.
 

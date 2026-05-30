@@ -55,7 +55,7 @@ was measured**:
 
 **Don't worry if this doesn't fully click yet** — building the intuition for *why* the
 red bar lies is exactly what the early chapters are for. By Chapter 12 you'll be able to
-spot **six different ways** that red bar sneaks into real projects (and how to avoid each).
+spot **seven different ways** that red bar sneaks into real projects (and how to avoid each).
 
 ---
 

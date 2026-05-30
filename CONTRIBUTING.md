@@ -1,5 +1,7 @@
 # Contributing
 
+**English** · [繁體中文](CONTRIBUTING.zh-TW.md)
+
 Thanks for helping improve **ML & Signal Processing on Neural Signals 101**! The
 goal is a tutorial that is *beginner-readable, reproducible, and honest*. Please
 keep those three properties intact.

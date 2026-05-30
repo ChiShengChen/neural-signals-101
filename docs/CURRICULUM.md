@@ -1,5 +1,7 @@
 # Curriculum & Roadmap (v2 — student-first redesign)
 
+**English** · [繁體中文](zh-TW/CURRICULUM.md)
+
 This document is the roadmap for the tutorial. **v1** targeted engineers who
 already knew sklearn/PyTorch and only needed the neural-signal side. **v2**
 retargets the real audience: **university students new to neuro-AI/ML**, who are

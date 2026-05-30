@@ -1,0 +1,264 @@
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+# ---
+
+# %% [markdown]
+# [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ChiShengChen/neural-signals-101/blob/main/notebooks/zh-TW/00_setup_and_data.ipynb)
+#
+# > **在 Google Colab 上執行？** 請先執行下一個儲存格——它會安裝所有套件並
+# > 抓取輔助套件。**在本地端執行（執行 `make setup` 之後）？** 下一個
+# > 儲存格不會做任何事；直接執行並繼續即可。
+
+# %%
+# --- Colab 初始化：僅在 Colab 環境中安裝相依套件與 neuro101 套件 ---
+import sys, os
+if "google.colab" in sys.modules:
+    !pip install -q "mne==1.8.0" "moabb==1.2.0" "braindecode==0.8.1" "pyriemann==0.7" "scikit-learn==1.5.2"
+    if not os.path.exists("neural-signals-101"):
+        !git clone -q https://github.com/ChiShengChen/neural-signals-101
+    sys.path.insert(0, os.path.abspath("neural-signals-101/src"))
+    print("Colab 設置完成——請繼續閱讀以下章節。")
+
+# %% [markdown]
+# # 第 00 章 — 環境設置與資料
+#
+# **歡迎！** 這是《神經訊號機器學習與訊號處理 101》的第一本筆記本。學完本章後，
+# 你將擁有可以下載真實公開腦部記錄並繪製圖形的可執行程式碼，讓你馬上有東西可以
+# 探索。
+#
+# ## 學習目標
+# 1. 了解我們所使用的 Python 生態系（每個函式庫的用途）。
+# 2. 認識常見的神經資料**檔案格式（file formats）**（EDF、BDF、FIF、BrainVision）。
+# 3. 下載並繪製本教學中每個公開資料集的範例。
+# 4. 了解本倉庫如何維持**可重現性（reproducibility）**與**CPU 友善性**。
+#
+# > **先修條件：** 無——從這裡開始。
+# > **難度：** ★☆☆☆☆
+# > **執行時間：** 第一次約 3–5 分鐘（之後會快取下載結果）。在
+# > 「煙霧測試模式（smoke mode）」（`NEURO101_SMOKE=1`，供 CI 使用）下，最大的
+# > 下載會被跳過。
+#
+# 不需要任何神經科學背景。每個術語在首次出現時都會定義。剛接觸專業術語嗎？
+# 請在另一個分頁中開啟 [`docs/GLOSSARY.md`](../../docs/GLOSSARY.md)。
+
+# %% [markdown]
+# ## 我們使用的 Python 生態系
+#
+# | 函式庫 | 對我們的功用 |
+# |---|---|
+# | **numpy / scipy** | 陣列與訊號處理（濾波器、FFT） |
+# | **matplotlib** | 繪圖 |
+# | **mne** | EEG/MEG 的標準函式庫：載入、濾波、分段（epoching）、繪圖 |
+# | **scikit-learn** | 傳統機器學習 + 正確的交叉驗證（cross-validation）工具 |
+# | **pytorch / braindecode** | 專為 EEG 設計的深度學習模型 |
+# | **pyriemann** | 協方差（covariance）/ 黎曼流形（Riemannian）特徵（現代 BCI 的強力基準） |
+# | **moabb** | 一行指令存取標準 BCI 資料集 |
+#
+# 我們自己的輔助套件是 **`neuro101`**（位於 `src/`）。它包含載入器、
+# 前處理、特徵以及——最重要的——每個後續章節都依賴的*防資料洩漏（leakage-safe）*
+# 評估工具。
+
+# %%
+# 初始化：讓 `import neuro101` 不論是否執行過 `pip install -e .` 都能運作
+import sys, os
+from pathlib import Path
+try:
+    import neuro101  # noqa: F401
+except ModuleNotFoundError:
+    _p = Path.cwd()
+    for _ in range(5):
+        if (_p / "src" / "neuro101").exists():
+            sys.path.insert(0, str(_p / "src")); break
+        _p = _p.parent
+    import neuro101  # noqa: F401
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from neuro101 import datasets as ds
+from neuro101 import io, viz
+
+SMOKE = ds.is_smoke()  # 在 CI 中為 True -> 使用最小的資料切片
+print("neuro101 版本:", neuro101.__version__)
+print("煙霧測試模式:", SMOKE, "| 資料快取位置:", ds.cache_dir())
+
+# %% [markdown]
+# ## 資料集（及其大小）
+#
+# 本倉庫不附帶任何資料——每個資料集都是**第一次使用時下載並快取**。以下是完整
+# 的登錄表，包括大約的下載大小，讓你在抓取數 GB 資料前知道會耗費多少空間。
+
+# %%
+print(ds.describe())
+
+# %% [markdown]
+# ## 你會遇到的檔案格式
+#
+# 神經記錄使用少數幾種容器格式儲存。它們最終都儲存*樣本數 × 通道數*加上元資料
+# （通道名稱、取樣率、事件）：
+#
+# - **EDF / EDF+**（`.edf`）——*歐洲資料格式（European Data Format）*。EEG 和
+#   睡眠資料非常常用（PhysioNet 使用此格式）。開放且廣泛支援。
+# - **BDF**（`.bdf`）——BioSemi 的 24 位元 EDF 變體。
+# - **FIF**（`.fif`）——Elekta/MEGIN 格式，MNE 的原生格式（MEG+EEG）。
+# - **BrainVision**（`.vhdr` + `.eeg` + `.vmrk`）——Brain Products 的三檔格式；
+#   `.vhdr` 是你實際開啟的標頭檔。
+# - **GDF**（`.gdf`）——部分 BCI 競賽資料集使用。
+#
+# **你幾乎不需要手動解析這些格式。** MNE 對每種格式都有 `read_raw_*` 函式，
+# 它們都回傳同一種物件：MNE `Raw`。
+
+# %% [markdown]
+# ## 資料集 1 — PhysioNet 運動想像（小型，下載速度快）
+#
+# 受試者在想像移動手部/腳部時的 64 通道 EEG。我們載入一位受試者並繪製幾秒鐘、
+# 幾個通道的資料。這是「原始 EEG（raw EEG）」：隨時間變化的波動電壓軌跡，每個
+# 電極各一條。
+
+# %%
+X_pn, y_pn, subj_pn = io.load_physionet_mi_epochs(n_subjects=1)
+print("PhysioNet 分段（epochs）:", X_pn.shape, "標籤:", np.bincount(y_pn))
+
+# 繪製第一個分段、前 3 個通道，加上垂直偏移量堆疊顯示。
+sf_pn = ds.DATASETS["physionet_mi"].sfreq_hz
+fig, ax = plt.subplots(figsize=(9, 3.5))
+offsets = np.arange(3) * 50e-6  # 50 µV 間距，避免軌跡重疊
+for ch in range(3):
+    ax.plot(np.arange(X_pn.shape[-1]) / sf_pn,
+            X_pn[0, ch] + offsets[ch], lw=0.7)
+ax.set(xlabel="時間（秒）", ylabel="通道（有偏移量）", title="PhysioNet MI — 原始 EEG（1 個分段，3 個通道）")
+plt.show()
+
+# %% [markdown]
+# ## 資料集 2 — BCI Competition IV 2a（主要資料集）
+#
+# 22 通道 EEG，9 位受試者，4 類運動想像。本教學全程使用**左手對右手**子集。
+# 下方載入最小切片並顯示我們將餵給模型的資料陣列形狀：
+# `（試驗數, 通道數, 時間點數）`。
+
+# %%
+n_subj = 2 if SMOKE else 2  # 讓第 00 章執行速度快；後續章節載入更多
+Xb, yb, subjb = io.load_bnci_2a_epochs(n_subjects=n_subj)
+print("BCI IV 2a 分段（epochs）:", Xb.shape, "| 類別（0=左手, 1=右手）:", np.bincount(yb))
+print("出現的受試者:", np.unique(subjb))
+
+sf_b = ds.DATASETS["bnci_2a"].sfreq_hz
+viz.plot_signal(Xb[0, 0], sf_b, title="BCI IV 2a — 一個運動想像試驗的單一通道",
+                units="µV (scaled)")
+plt.show()
+
+# %% [markdown]
+# ## ⭐ 陣列形狀的心智模型（請讀兩遍）
+#
+# EEG 程式碼中幾乎每個初學者的錯誤都是**形狀錯誤（shape bug）**：某個軸接錯
+# 方向、靜默的廣播（broadcast），或是多餘的轉置（transpose）。現在建立心智模型，
+# 之後可以節省數小時的除錯時間。
+#
+# 我們的分段資料（epoched data）始終是一個**3 維陣列**，含義如下：
+#
+# ```
+#            第 0 軸          第 1 軸           第 2 軸
+#   X  =  ( n_trials  ,   n_channels   ,    n_times   )
+#          「第幾個        「第幾個            「第幾個
+#           試驗？」        電極？」            時間樣本？」
+# ```
+#
+# - **`X[i]`** → 一個試驗：一個 2 維 `（通道數, 時間點數）` 切片。
+# - **`X[i, c]`** → 一個試驗的一個通道：一維時間序列（就是我們繪製的）。
+# - **`X[:, c, :]`** → *所有*試驗的第 `c` 個通道。
+# - **`X.mean(axis=2)`** → 對**時間**取平均 → `（試驗數, 通道數）`。
+# - **`X.mean(axis=0)`** → 對**試驗**取平均 → `（通道數, 時間點數）`（即事件相關電位 ERP）。
+#
+# 標籤與**第 0 軸**對齊：`y` 的形狀為 `(n_trials,)`，`y[i]` 是 `X[i]` 的
+# 標籤。保持這個對應關係——如果你重新排序試驗，也要以相同方式重新排序 `y`。
+
+# %%
+print("X 形狀:", Xb.shape, " -> (n_trials, n_channels, n_times)")
+print("一個試驗   X[0]    :", Xb[0].shape, "  (channels, times)")
+print("一個通道 X[0, 0] :", Xb[0, 0].shape, "  (times,) -> 一維訊號")
+print("標籤      y       :", yb.shape, " -> 每個試驗一個標籤; y[0] =", yb[0])
+
+# 一個典型的靜默錯誤：對錯誤的軸取平均。
+over_time = Xb.mean(axis=2)      # 正確：折疊時間 -> (trials, channels)
+over_trials = Xb.mean(axis=0)    # 不同含義：平均試驗（channels, times）
+print("\n對時間取平均 (axis=2):", over_time.shape, "= 每個試驗每個通道一個數字")
+print("對試驗取平均(axis=0):", over_trials.shape, "= 平均試驗（即 ERP）")
+print("這兩者不可互換——選錯軸會靜默地產生垃圾結果。")
+
+# %% [markdown]
+# > **廣播（broadcasting）與轉置陷阱。** NumPy 會毫無怨言地將 `(channels, 1)`
+# > 陣列對 `(channels, times)` 廣播——雖然方便，但也意味著形狀錯誤的陣列可能
+# > 產生數字而不是錯誤訊息。而 `X[i].T`（轉置為 `(times, channels)`）正是某些
+# > 函式庫所要求的格式，而其他函式庫卻拒絕——務必確認函式期望的形狀。**當結果
+# > 看起來很奇怪時，先印出 `.shape`。** 這是所有神經訊號機器學習中最快速的
+# > 除錯習慣。（常見錯誤請參閱 `docs/TROUBLESHOOTING.md`。）
+
+# %% [markdown]
+# ## 資料集 3 — Sleep-EDF（後續用於睡眠分期與類別不平衡）
+#
+# 整晚錄音，附有專家**睡眠分期（sleep-stage）**標籤。我們載入一晚並顯示每個
+# 分期有多少個 30 秒片段——注意類別非常**不平衡（imbalanced）**（N2 很多）。
+# 我們將在第 12 章使用這種不平衡來說明為什麼*準確率（accuracy）*可能會說謊。
+
+# %%
+Xs, ys, subjs = io.load_sleep_edf_epochs(n_subjects=1)
+from neuro101.io import SLEEP_STAGE_NAMES
+counts = np.bincount(ys, minlength=len(SLEEP_STAGE_NAMES))
+print("Sleep-EDF 分段（epochs）:", Xs.shape)
+for name, c in zip(SLEEP_STAGE_NAMES, counts):
+    print(f"  {name:4s}: {c}")
+
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.bar(SLEEP_STAGE_NAMES, counts, color="#4c72b0")
+ax.set(title="Sleep-EDF — 每個睡眠分期的片段數（注意不平衡）", ylabel="數量")
+plt.show()
+
+# %% [markdown]
+# ## 資料集 4 — MNE 範例（MEG+EEG；大型，選用）
+#
+# 經典的 MNE 教學資料集（聽覺/視覺任務）。大小約 **1.5 GB**，因此在
+# 煙霧測試/CI 模式下我們跳過下載，僅描述它。在本地端執行可以
+# 看到真實的 MEG+EEG 記錄及其事件標記。
+
+# %%
+if SMOKE:
+    print("煙霧測試模式：跳過 1.5 GB 的 MNE 範例下載。")
+    print("請在本地端執行（不加 NEURO101_SMOKE=1）以下載並繪製。")
+else:
+    raw = io.load_mne_sample_raw()
+    print(raw)
+    events, event_id = io.load_mne_sample_events(raw)
+    print("事件類型:", event_id, "| 事件數:", len(events))
+    # 繪製幾個 EEG 通道的 5 秒資料。
+    picks = raw.copy().pick("eeg").ch_names[:4]
+    raw.copy().pick(picks).plot(duration=5.0, n_channels=4, show=True, block=False)
+
+# %% [markdown]
+# ## 本倉庫如何維持可重現性與執行效率
+#
+# - **固定版本的 `requirements.txt`** 和 Python 3.11 虛擬環境（`make setup`）。
+# - 到處使用**固定亂數種子（seeded RNGs）**（你會看到 `random_state=0`）。
+# - **子取樣（subsampling）**：載入器讀取環境變數 `NEURO101_SMOKE` 並縮減資料，
+#   讓每個筆記本在幾分鐘內就能在筆記型電腦 CPU 上執行。當我們子取樣時，
+#   總是會*告訴你*。
+# - **快取下載**至 `~/neuro101_data`（可用 `NEURO101_DATA` 覆蓋）。
+
+# %% [markdown]
+# ## ⚠️ 常見錯誤 / 為什麼這樣做是錯的
+#
+# - **假設資料存在你的磁碟上。** 永遠不要寫死 `/Users/me/eeg.edf`。
+#   一律透過程式碼下載，讓其他人也能重現你的工作。（本倉庫從不讀取你需要
+#   自行提供的本地檔案。）
+# - **忽略取樣率（sampling rate）。** 這裡每個資料集的取樣率*不同*
+#   （160、250、100 Hz……）。為某個取樣率撰寫的濾波器或 FFT 對另一個
+#   取樣率是錯誤的。務必將 `sfreq` 與你的資料一起保留。
+# - **先下載再忘記。** 在 CI 中執行的筆記本裡有個 1.5 GB 的下載會逾時。
+#   保護大型下載（就像我們對 MNE 範例所做的）並記錄大小。
+# - **編輯生成的 `.ipynb`。** 在本倉庫中，真實來源是
+#   `notebooks/_src/*.py`。編輯那些檔案並執行 `make notebooks`（參見 CONTRIBUTING）。
+#
+# **下一章：** 第 01 章——這些訊號在物理上*是什麼*，以及雜訊從何而來。

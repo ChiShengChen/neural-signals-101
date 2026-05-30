@@ -1,5 +1,7 @@
 # FAQ — the questions every beginner actually asks
 
+**English** · [繁體中文](zh-TW/FAQ.md)
+
 This is the **conceptual** companion to [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
 (which fixes error messages). Here we answer the *"wait, is this normal?"* questions
 that decide whether you keep going.

@@ -1,5 +1,7 @@
 # Glossary & Acronym Index
 
+**English** · [繁體中文](zh-TW/GLOSSARY.md)
+
 Every term and acronym used in the tutorial, in one place. Terms are also defined
 on first use inside the notebooks — this page is for quick lookup. Roughly grouped;
 use your browser's find (Ctrl/Cmd-F).
