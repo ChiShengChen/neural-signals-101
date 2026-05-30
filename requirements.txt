@@ -1,0 +1,44 @@
+# =====================================================================
+# ML & Signal Processing on Neural Signals 101 — pinned dependencies
+# Target interpreter: Python 3.11  (see `make setup`)
+#
+# These versions are a known-good, mutually-compatible constellation.
+# Torch is installed as a CPU-only build by the Makefile via:
+#   pip install torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+# (listed here too so `pip install -r requirements.txt` alone still works).
+# =====================================================================
+
+# --- Core scientific stack ---
+numpy==1.26.4
+scipy==1.13.1
+matplotlib==3.9.2
+pandas==2.2.2
+scikit-learn==1.5.2
+
+# --- Neural-signal specific ---
+mne==1.8.0
+pyriemann==0.7
+
+# --- BCI datasets + deep learning ---
+moabb==1.2.0
+braindecode==0.8.1
+torch==2.4.1
+
+# --- Notebooks + execution ---
+jupyter==1.1.1
+notebook==7.2.2
+nbclient==0.10.0
+nbformat==5.10.4
+ipykernel==6.29.5
+jupytext==1.16.4
+
+# --- Testing / quality ---
+pytest==8.3.3
+nbval==0.11.0
+ruff==0.6.9
+
+# --- Download / progress utilities ---
+pooch==1.8.2
+tqdm==4.66.5
+requests==2.32.3
+h5py==3.11.0

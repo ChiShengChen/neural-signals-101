@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neuro101"
+version = "0.1.0"
+description = "Shared, tested package for the 'ML & Signal Processing on Neural Signals 101' tutorial."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Neural Signals 101 contributors" }]
+keywords = ["eeg", "bci", "signal-processing", "machine-learning", "tutorial"]
+
+# Runtime deps are pinned in requirements.txt (the reproducible source of truth).
+# We keep this list loose so `pip install -e .` works without re-pinning.
+dependencies = [
+    "numpy", "scipy", "matplotlib", "pandas", "scikit-learn",
+    "mne", "pyriemann", "moabb", "braindecode", "torch",
+    "pooch", "tqdm", "requests",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "nbval", "ruff", "jupytext", "nbclient", "nbformat"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+filterwarnings = ["ignore"]
+markers = [
+    "network: test requires downloading a public dataset (deselect with -m 'not network')",
+    "slow: test is slow (deselect with -m 'not slow')",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["notebooks/*.ipynb"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E402", "E501"]  # E402: notebooks import after sys.path tweak; E501: long docstrings

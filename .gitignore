@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+# Executed-notebook artifacts (the committed notebooks/*.ipynb are clean, no outputs).
+notebooks/_executed/
+
+# Downloaded / cached datasets (can be GBs — never commit)
+data/
+mne_data/
+~/mne_data/
+*.edf
+*.bdf
+*.gdf
+*.fif
+*.vhdr
+*.eeg
+*.vmrk
+
+# Model checkpoints
+*.pt
+*.pth
+*.ckpt
+checkpoints/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Keep the headline figure (generated, but committed so the README renders on GitHub)
+!docs/headline.png
