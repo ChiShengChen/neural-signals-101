@@ -5,6 +5,8 @@
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ChiShengChen/neural-signals-101/blob/main/notebooks/00_setup_and_data.ipynb)
 
+**English** · [繁體中文](README.zh-TW.md)
+
 > Go from **raw brain recordings → preprocessing → features → models → an honest
 > score**, entirely through runnable Jupyter notebooks. **Built for university
 > students new to neuro-AI/ML** — you only need basic Python. We assume **no** prior
@@ -23,15 +25,6 @@ public is its ethical twin (Chapter 13).
 > 📚 New here? See [`docs/CURRICULUM.md`](docs/CURRICULUM.md) for the full learning
 > design and rationale.
 
-![Inflated vs honest score](docs/headline.png)
-
-*The same model on the same data (BCI Competition IV 2a motor imagery). The only
-difference is the evaluation method: the red bar pools subjects and splits
-**randomly**, so it secretly tests on people it trained on; the green bar uses
-**Leave-One-Subject-Out**, testing only on people it has never seen. The red bar
-is a mirage. This whole repo is about earning the green bar — and Chapter 12 shows
-six different ways the red bar sneaks into real projects.*
-
 ---
 
 ## What you'll be able to do
@@ -43,6 +36,26 @@ six different ways the red bar sneaks into real projects.*
   LSTM, a tiny Transformer) — all on a **laptop CPU in minutes**.
 - Evaluate **honestly**: no leakage, subject-independent headline metric,
   mean ± std, the right metric for imbalance.
+
+---
+
+## A taste of the big idea
+
+Here is the one habit this whole tutorial builds toward. Both bars below come from
+the **same model on the same brain data** — the *only* difference is **how the score
+was measured**:
+
+![Inflated vs honest score](docs/headline.png)
+
+- 🔴 **Red bar** — data from many people is mixed together and split *randomly*, so the
+  model is quietly tested on the very people it learned from. It looks great… and it's a
+  mirage.
+- 🟢 **Green bar** — the model is tested only on people it has **never seen**. Lower, but
+  **honest** — this is the number that survives the real world.
+
+**Don't worry if this doesn't fully click yet** — building the intuition for *why* the
+red bar lies is exactly what the early chapters are for. By Chapter 12 you'll be able to
+spot **six different ways** that red bar sneaks into real projects (and how to avoid each).
 
 ---
 
