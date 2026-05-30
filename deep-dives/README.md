@@ -1,5 +1,7 @@
 # Deep-dives — the advanced ceiling 🏔️
 
+**English** · [繁體中文](zh-TW/README.md)
+
 These are **optional side-quests** for readers who finished the main spine
 (`notebooks/00`–`15`) and want the real math, derivations, and edge cases. Unlike the
 main chapters, they are **not bound by the "5-minute CPU" promise** and assume you're
