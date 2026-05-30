@@ -66,6 +66,10 @@ lint: ## Run ruff over src/, tests/ and scripts/
 headline: ## Regenerate the README headline figure
 	$(PY) scripts/make_headline_figure.py
 
+.PHONY: social
+social: ## Regenerate the GitHub social-preview banner (docs/social-preview.png)
+	$(PY) scripts/make_social_preview.py
+
 # ---- housekeeping -------------------------------------------------
 .PHONY: clean
 clean: ## Remove caches and build artifacts (keeps the .venv and downloads)
