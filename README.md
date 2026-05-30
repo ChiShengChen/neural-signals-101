@@ -1,5 +1,10 @@
 # ML & Signal Processing on Neural Signals 101 (Python)
 
+[![CI](https://github.com/ChiShengChen/neural-signals-101/actions/workflows/ci.yml/badge.svg)](https://github.com/ChiShengChen/neural-signals-101/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ChiShengChen/neural-signals-101/blob/main/notebooks/00_setup_and_data.ipynb)
+
 > Go from **raw brain recordings → preprocessing → features → models → an honest
 > score**, entirely through runnable Jupyter notebooks. **Built for university
 > students new to neuro-AI/ML** — you only need basic Python. We assume **no** prior
@@ -24,7 +29,7 @@ public is its ethical twin (Chapter 13).
 difference is the evaluation method: the red bar pools subjects and splits
 **randomly**, so it secretly tests on people it trained on; the green bar uses
 **Leave-One-Subject-Out**, testing only on people it has never seen. The red bar
-is a mirage. This whole repo is about earning the green bar — and Chapter 09 shows
+is a mirage. This whole repo is about earning the green bar — and Chapter 12 shows
 six different ways the red bar sneaks into real projects.*
 
 ---
@@ -43,10 +48,15 @@ six different ways the red bar sneaks into real projects.*
 
 ## Install
 
-Requires **Python 3.11** and ~3 GB of free disk for cached datasets.
+**Fastest (no install):** click the **Open in Colab** badge above (or on any chapter in
+the table below) and run the first cell — a free cloud Python environment, nothing to
+set up. Great for a first look; see [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md).
+
+**Locally** (recommended for repeated use) — requires **Python 3.11** and ~3 GB of free
+disk for cached datasets:
 
 ```bash
-git clone <this-repo> && cd <this-repo>
+git clone https://github.com/ChiShengChen/neural-signals-101 && cd neural-signals-101
 make setup        # creates a Python 3.11 .venv and installs everything (CPU-only torch)
 source .venv/bin/activate
 ```
@@ -170,9 +180,9 @@ Extra exercises with answers: [`docs/SOLUTIONS.md`](docs/SOLUTIONS.md).
 | Dataset | Used for | Approx. download |
 |---|---|---|
 | **MNE sample** (MEG+EEG) | First plots, ERPs (Ch 00) | ~1.5 GB (skipped in CI/smoke mode) |
-| **BCI Competition IV 2a** (motor imagery, via MOABB) | Headline + Ch 05–10 | ~0.2 GB per subject (9 subjects) |
-| **PhysioNet EEG Motor Movement/Imagery** | Ch 01, 03 (light demos) | ~40 MB per subject |
-| **Sleep-EDF** (polysomnography) | Sleep staging & imbalance (Ch 08, 09) | ~8 MB per recording |
+| **BCI Competition IV 2a** (motor imagery, via MOABB) | Headline + Ch 07–14 | ~0.2 GB per subject (9 subjects) |
+| **PhysioNet EEG Motor Movement/Imagery** | Ch 00, 01, 05 (light demos) | ~40 MB per subject |
+| **Sleep-EDF** (polysomnography) | Sleep staging & imbalance (Ch 10, 12) | ~8 MB per recording |
 
 Downloads are cached in `~/neuro101_data` (override with the `NEURO101_DATA`
 environment variable). See `src/neuro101/datasets.py` for the full registry and
@@ -220,7 +230,13 @@ make lint        # ruff
 make run-all     # execute every notebook end-to-end (full data)
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) to add a chapter or a feature.
+Tests include **soul-guards** (`tests/test_pitfalls.py`) that assert the WRONG→RIGHT
+contrasts of Chapter 12 still hold — so a refactor can't silently break the point of
+the tutorial. CI (`.github/workflows/ci.yml`) runs lint + unit tests + a notebook smoke
+test on every push.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) to add a chapter or a feature, and
+[`docs/CHEATSHEET.md`](docs/CHEATSHEET.md) for the one-page API + evaluation checklist.
 
 ## License
 
