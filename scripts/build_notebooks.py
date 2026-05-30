@@ -30,9 +30,11 @@ BUILD_DIRS = [
 
 def build_one(py_path: Path, out_dir: Path) -> Path:
     nb = jupytext.read(py_path)
-    # Write COMPLETE, standard notebook metadata. jupytext omits `language_info`
-    # when generating from a .py, and GitHub's notebook renderer (unlike local
-    # nbconvert) errors out ("An error occurred...") on notebooks without it.
+    # Make the committed .ipynb indistinguishable from a Jupyter-saved notebook so
+    # GitHub's (picky) renderer is happy: drop the jupytext-paired marker and write
+    # COMPLETE, standard metadata. jupytext omits `language_info` when generating
+    # from a .py, and GitHub errors ("An error occurred...") on notebooks without it.
+    nb.metadata.pop("jupytext", None)
     nb.metadata["kernelspec"] = {
         "display_name": "Python 3 (ipykernel)",
         "language": "python",
