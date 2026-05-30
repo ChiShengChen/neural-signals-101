@@ -4,8 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ChiShengChen/neural-signals-101/blob/main/notebooks/zh-TW/00_setup_and_data.ipynb)
+[![Render on nbviewer](https://img.shields.io/badge/render-nbviewer-orange.svg)](https://nbviewer.org/github/ChiShengChen/neural-signals-101/tree/main/notebooks/zh-TW/)
 
 [English](README.md) · **繁體中文**
+
+> 📓 **Notebook 在 GitHub 上無法預覽?** GitHub 的 notebook 算繪器偶爾會抽風。改用
+> **[nbviewer](https://nbviewer.org/github/ChiShengChen/neural-signals-101/tree/main/notebooks/zh-TW/)**
+> 開啟(它一定能用),或點上方徽章用 Colab 執行。
 
 > 從**原始腦波紀錄 → 前處理 → 特徵 → 模型 → 誠實的評分**,全程透過可執行的 Jupyter
 > notebook 學會。**專為神經 AI/ML 入門大學生設計**——你只需要基本的 Python。我們**不**

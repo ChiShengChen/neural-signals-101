@@ -4,8 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ChiShengChen/neural-signals-101/blob/main/notebooks/00_setup_and_data.ipynb)
+[![Render on nbviewer](https://img.shields.io/badge/render-nbviewer-orange.svg)](https://nbviewer.org/github/ChiShengChen/neural-signals-101/tree/main/notebooks/)
 
 **English** · [繁體中文](README.zh-TW.md)
+
+> 📓 **Notebook won't preview on GitHub?** GitHub's notebook renderer is occasionally
+> flaky. Open any notebook on **[nbviewer](https://nbviewer.org/github/ChiShengChen/neural-signals-101/tree/main/notebooks/)**
+> instead (it always works), or run it in Colab via the badge above.
 
 > Go from **raw brain recordings → preprocessing → features → models → an honest
 > score**, entirely through runnable Jupyter notebooks. **Built for university
